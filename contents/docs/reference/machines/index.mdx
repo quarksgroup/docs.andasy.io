@@ -1,0 +1,14 @@
+---
+title: Machines
+description: Learn how to create and manage machines in Andasy.
+---
+
+Machines are the microVMs that run your applications on the Andasy platform. Your application code is packaged into a container image and deployed to a machine, where it is run in a secure and isolated environment. An application can have multiple machines associated with it, allowing you to scale your application horizontally.
+
+You can list machines associated with an application in the Andasy CLI by running the following command:
+
+```bash
+andasy machines list -a <app-name>
+```
+
+This command will display a list of machines associated with the specified application, along with their state and timestamps. You can use this information to monitor the health and performance of your application.

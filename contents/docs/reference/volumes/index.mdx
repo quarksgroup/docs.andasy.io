@@ -1,0 +1,31 @@
+---
+title: Volumes
+description: Learn how to create and manage volumes in Andasy.
+---
+
+Volumes are persistent storage resources that can be attached to machines in Andasy. They allow you to store data that needs to persist across machine restarts and scale your application horizontally by sharing data between multiple machines.
+
+## Creating a Volume
+
+To create a volume using the Andasy CLI, run the following command in your terminal:
+
+```bash
+andasy volumes create -a <app-name> -s <size> <volume-name>
+```
+
+Replace `<app-name>` with the name of the application that you want to associate the volume with, `<size>` with the size of the volume in MB, and `<volume-name>` with the name of the volume.
+
+The volume will be created and associated with the specified application.
+
+## List Volumes
+
+To list all the volumes associated with an application, run the following command:
+
+```bash
+andasy volumes list -a <app-name>
+```
+
+Replace `<app-name>` with the name of the application that you want to list volumes for.
+
+This command will display a list of all the volumes associated with the specified application.
+

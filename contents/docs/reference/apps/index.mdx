@@ -1,0 +1,46 @@
+---
+title: Apps
+description: Learn how to create and manage applications in Andasy.
+---
+
+Applications are the building blocks of Andasy. They are the projects that you deploy to the Andasy platform and run in the cloud. Applications can be created and managed using the Andasy CLI.
+
+## Creating an Application
+
+To create an application using the Andasy CLI, run the following command in your terminal:
+
+```bash
+andasy apps create
+```
+
+This command will prompt you to enter the name of the application and the organization that you want to associate the application with. Once you have entered this information, the application will be created, and you will be added as the owner.
+
+## Managing an Application
+
+Applications can be managed using the Andasy CLI. You can view a list of all the applications associated with your account, as well as view detailed information about a specific application.
+
+To view a list of all the applications in a particular organization, run the following command:
+
+```bash
+andasy apps list
+```
+
+This command will prompt you to select an organization from a list of organizations associated with your account. Once you have selected an organization, a list of all the applications associated with that organization will be displayed.
+
+To view detailed information about a specific application, run the following command:
+
+```bash
+andasy apps show -a <app-name>
+```
+
+Replace `<app-name>` with the name of the application that you want to view detailed information about. if you currently are in the root directory of the application, you can omit the `-a` flag as long as a `config.hcl` file exists in the root directory.
+
+## Restarting an Application
+
+In some cases, you may need to restart an application that is experiencing issues or has stopped responding. You can restart an application using the Andasy CLI by running the following command:
+
+```bash
+andasy apps restart -a <app-name>
+```
+
+Replace `<app-name>` with the name of the application that you want to restart. if you currently are in the root directory of the application, you can omit the `-a` flag as long as a `config.hcl` file exists in the root directory.

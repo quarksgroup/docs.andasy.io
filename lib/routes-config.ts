@@ -19,29 +19,21 @@ export const ROUTES: EachRoute[] = [
         href: "/installation",
       },
       { title: "Quick Start Guide", href: "/quick-start-guide" },
-      {
-        title: "Project Structure",
-        href: "/project-structure",
-      },
-      {
-        title: "Components",
-        href: "/components",
-        items: [
-          { title: "Stepper", href: "/stepper" },
-          { title: "Tabs", href: "/tabs" },
-          { title: "Note", href: "/note" },
-          { title: "Code Block", href: "/code-block" },
-          { title: "Image & Link", href: "/image-link" },
-          { title: "Custom", href: "/custom" },
-        ],
-      },
-      { title: "Themes", href: "/themes" },
-      {
-        title: "Customize",
-        href: "/customize",
-      },
     ],
   },
+  {
+    title: "Reference",
+    href: "/reference",
+    noLink: true,
+    items: [
+      { title: "Authentication", href: "/authentication" },
+      { title: "Organizations", href: "/organizations" },
+      { title: "Apps", href: "/apps" },
+      { title: "Machines", href: "/machines" },
+      { title: "Volumes", href: "/volumes" },
+      { title: "SSH Sessions", href: "/ssh" },
+    ],
+  }
 ];
 
 type Page = { title: string; href: string };

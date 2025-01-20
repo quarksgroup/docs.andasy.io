@@ -1,80 +1,69 @@
 ---
 title: Quick Start Guide
-description: This section provides an overview of Quick Start Guide.
+description: Learn how to get started with Andasy and deploy your first application.
 ---
 
-Follow these simple instructions to set up your project efficiently and begin creating content without delay!:
+This guide will help you get started with Andasy and deploy your first application. Before you begin, make sure you have the following prerequisites:
 
-## Documentation
+- An Andasy account. If you don't have one, you can sign up for free [here](https://andasy.io/register).
+- The Andasy CLI installed on your local machine. Check out the [installation guide](/docs/getting-started/installation) for more information.
+- A basic understanding of Docker and how to create a `Dockerfile` for your application.
 
-1. **Configure Routing**
-   - Open the `@lib/route-config.ts` file and add your routing pages:
-     ```typescript
-     export const ROUTES: EachRoute[] = [
-         // Add new route below
-         {
-             title: "Fundamentals",
-             href: "/fundamentals",
-             noLink: true, // Set to true to prevent routing
-             items: [
-                 // All the sub-sections under `fundamentals`
-                 { title: "HTTP Server", href: "/http-server" },
-             ],
-         },
-     ];
-     ```
+## Deploying Your First Application
 
-2. **Create Content Structure**
-   - Navigate to the `@content/docs` directory and create a folder named `fundamentals`, as defined in the `route-config` file. Within this folder, create a subfolder named `http-server`, and inside that, create an `index.mdx` file that will render when you navigate to `/fundamentals/http-server`:
-     ```plaintext
-     root
-     ├── content/docs
-     │   └── fundamentals
-     │       └── http-server
-     │           └── index.mdx
-     ```
+To deploy your first application on Andasy, you need to first log in to your Andasy account using the following command:
 
-3. **Write Your Markdown Content**
-   - Start writing your markdown content inside the `index.mdx` file. Be sure to include frontmatter at the beginning of the file, which is used for the page title and description:
-     ```markdown showLineNumbers {1-4}
-     --- 
-     title: HTTP Server
-     description: This section is about HTTP Server.
-     ---
+```bash
+andasy auth login
+```
 
-     <!-- Here goes your markdown content -->
-     ```
+### Step 1: Create a New Project
 
-4. **Run Your Application**
-   - Ensure your application is running. Navigate to `http://localhost:3000/docs/fundamentals/http-server` to view your content. You should also see it in the left panel, allowing you to navigate to other pages.
+In order to deploy an application on Andasy, you need to create a new project. A project must contain the source code of your application and a `Dockerfile` that specifies how to build the application.
 
+To initialize andasy in your project, run the following command in your terminal:
 
-## Blogs
+```bash
+andasy setup
+```
 
-To get started with blogs, follow these steps:
+This will create an application on andasy and try to detect the type of application you are trying to deploy and generate a Dockerfile for you.
 
-- Navigate to the `@content/blogs` directory and create a file with a unique name prefixed with `.mdx`, then start writing the markdown content inside.
+After the project is created, it will write a `config.hcl` file in your project directory with the necessary information for your application deployment. Double-check the configuration to ensure it is correct with the right port for your application.
 
-- Make sure to add the following frontmatter to format data for the blogs properly:
-  ```markdown
-  ---
-  title: "Building a Recursive File System with React: A Deep Dive"
-  description: "Explore how to create a recursive file system in React. This blog post provides a comprehensive guide on building a file system where folders and files can be nested, added, renamed, and deleted."
-  date: 02-09-2024
-  authors:
-    - avatar: "https://ui.shadcn.com/avatars/02.png"
-      handle: nisabmohd
-      username: Nisab Mohd
-      handleUrl: "https://github.com/nisabmohd"
-  cover: "https://img.freepik.com/premium-vector/many-monsters-various-colors-doodle-come-bless-birthday-happy_577083-84.jpg?w=826"
-  ---
-  <!-- Your blog markdown content -->
-  ```
+### Step 2: Deploy Your Application
 
-- Navigate to your local development server at `http://localhost:3000/blog`, where you will see your blog listed and sorted based on date. You can navigate to any blog to read it.
+Once you have created your project, you can deploy it to Andasy by running the following command:
 
+```bash
+andasy deploy
+```
 
-## Explore Further
+This command will package your application, send it to a remote builder, and deploy it to the Andasy platform.
 
-This section serves as your starting point for exploring the application. By following the steps above, you can quickly and easily set up your content. For more customization and control, please refer to the following pages.
+If you want to build your application locally, you can use the following command:
 
+```bash
+andasy build --mode local
+```
+
+This will build your application image locally and push it to our registry.
+
+You can deploy your application by just providing the application docker image URL:
+
+```bash
+andasy deploy --image-label <image-url>
+```
+
+### Step 3: Access Your Application
+
+After your application has been deployed, you can access it by visiting the URL displayed in the output of the `andasy deploy` command or go to `https://<app_name>.andasy.dev`.
+
+Congratulations! You have successfully deployed your first application on Andasy.
+
+## Next Steps
+
+Now that you have deployed your first application on Andasy, you can explore the various features and capabilities of the platform. Here are some next steps you can take:
+
+- Learn how you can ssh into your application container.
+- Explore the various features of the Andasy platform, such as custom domains, SSL certificates, and more.

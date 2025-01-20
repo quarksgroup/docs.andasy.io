@@ -1,0 +1,18 @@
+---
+title: SSH Sessions
+description: Learn how to initiate SSH Sessions to your Andasy machines.
+---
+
+You can initiate an SSH session to a machine running your application on the Andasy platform using the Andasy CLI. This allows you to access the machine's shell and interact with your application directly.
+
+## Initiating an SSH Session
+
+To initiate an SSH session to a machine running your application, run the following command in your terminal:
+
+```bash
+andasy ssh -a <app-name>
+```
+
+Replace `<app-name>` with the name of the application that you want to initiate an SSH session to. If you currently are in the root directory of the application, you can omit the `-a` flag as long as a `config.hcl` file exists in the root directory.
+
+This command will establish an SSH connection to the machine running your application and open a shell session. You can interact with your application and run commands as if you were logged in to the machine directly.
