@@ -39,7 +39,10 @@ export const ROUTES: EachRoute[] = [
     ]
   },
   {
-    title: "Services", href: "/services", items: [
+    title: "Services",
+    href: "/services",
+    noLink: true,
+    items: [
       { title: "Metrics", href: "/metrics" },
       { title: "Logs", href: "/logs" },
     ],
