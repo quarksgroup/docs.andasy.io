@@ -22,7 +22,7 @@
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.435.0",
     "next": "15.2.4",
-    "next-mdx-remote": "^5.0.0",
+    "next-mdx-remote-client": "^2.1.2",
     "next-themes": "^0.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

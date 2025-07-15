@@ -29,9 +29,19 @@ export const ROUTES: EachRoute[] = [
       { title: "Authentication", href: "/authentication" },
       { title: "Organizations", href: "/organizations" },
       { title: "Apps", href: "/apps" },
+      { title: "Setup", href: "/setup" },
+      { title: "Deploy", href: "/deploy" },
       { title: "Machines", href: "/machines" },
       { title: "Volumes", href: "/volumes" },
+      { title: "Snapshots", href: "/snapshots" },
       { title: "SSH Sessions", href: "/ssh" },
+      { title: "Builder", href: "/builder" },
+    ]
+  },
+  {
+    title: "Services", href: "/services", items: [
+      { title: "Metrics", href: "/metrics" },
+      { title: "Logs", href: "/logs" },
     ],
   }
 ];

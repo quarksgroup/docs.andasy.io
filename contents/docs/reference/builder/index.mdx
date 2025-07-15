@@ -1,0 +1,57 @@
+---
+title: Builder
+description: Learn how to manage organization builder in Andasy.
+---
+
+Each organization on andasy platform has a dedicated builder that is used to build the application image. A builder is a normal app provisioned automatically for each organization to be used during
+`andasy deploy`. It is used if the user is not using the local Docker to create their image.
+
+## Info of the builder
+
+The following command gets an organization builder information.
+
+```bash
+ andasy orgs builder info -o <org_slug>
+```
+Replace `<org_slug>` with the organization slug. `-o <org_slug>` is optional.
+
+The output will look like this:
+```
+Builder information
+  App_ID  = 40a40cdb-55c8-4364-bae1-f038833133ce
+  Name    = nights-lecturer-market
+  URL     = https://nights-lecturer-market.andasy.dev/
+  State   = running
+  Created = 2025-07-07 09:38:21
+  Updated = 2025-07-07 09:38:21
+```
+`Name` is the name of the app of this builder. So builder can be managed like all other apps by using this name.
+
+## Pinging the builder
+
+The following command pings an organization builder for health checks. This helps to check if your builder is up and running.
+
+```bash
+andasy orgs builder ping -o <org_slug>
+```
+Replace `<org_slug>` with the organization slug. `-o <org_slug>` is optional.
+
+## Restarting the builder
+
+The following command restarts an organization builder. Sometimes the provisioned builder can be full on disk due to caches or you may want to get
+the latest update of the our builder. This command regenerate a fresh builder by getting the latest version and deleting all caches.
+
+```bash
+andasy orgs builder restart -o <org_slug>
+```
+Replace `<org_slug>` with the organization slug. `-o <org_slug>` is optional.
+
+## Deleting the builder
+
+The following command delete an organization builder. Once deleted, builder will be
+recreated automatically during app deploy, unless local Docker is being used by all members of the organization.
+
+```bash
+andasy orgs builder delete -o <org_slug>
+```
+Replace `<org_slug>` with the organization slug. `-o <org_slug>` is optional.
