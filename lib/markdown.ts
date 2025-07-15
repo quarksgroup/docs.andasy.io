@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import matter from "gray-matter";
-import { compileMDX } from "next-mdx-remote/rsc";
+import { evaluate } from "next-mdx-remote-client/rsc";
 import path from "path";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeCodeTitles from "rehype-code-titles";
@@ -35,8 +35,8 @@ const components = {
 };
 
 // can be used for other pages like Guides etc
-async function parseMdx<Frontmatter>(rawMdx: string) {
-  return await compileMDX<Frontmatter>({
+async function parseMdx<Frontmatter extends Record<string, unknown>>(rawMdx: string) {
+  return await evaluate<Frontmatter>({
     source: rawMdx,
     options: {
       parseFrontmatter: true,

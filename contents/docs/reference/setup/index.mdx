@@ -1,0 +1,26 @@
+---
+title: Setup
+---
+
+# `andasy setup`
+
+The `andasy setup` command streamlines the initial configuration of your application for deployment. It automatically detects the programming language of your project, generates a suitable `Dockerfile`, and creates a configuration file in `.hcl` format. These files are essential for deploying your application with Andasy, ensuring consistent environments and simplified deployment workflows.
+
+## Description
+
+When you run `andasy setup`, the CLI analyzes your application's working directory to determine the language and framework in use. Based on this detection, it generates a tailored `Dockerfile` that encapsulates the necessary build and runtime instructions. Additionally, it produces a `.hcl` configuration file containing metadata and settings required for deployment.
+
+You can customize the setup process using various flags, such as specifying the application name, organization, or output format. The command is designed to be flexible, supporting both interactive and automated workflows.
+
+## Usage
+
+```
+andasy setup [flags]
+```
+
+#### Flags
+
+- `--generate-name`   Generate an app name
+- `-h, --help`            help for setup
+- `--name` string     The app name to use
+- `-o`, --org string      The target andasy organization

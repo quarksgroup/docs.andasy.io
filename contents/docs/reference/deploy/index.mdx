@@ -1,0 +1,48 @@
+---
+title: Deploy
+description: Learn about deploy command
+---
+
+
+### Overview
+
+The `andasy deploy` command enables you to deploy applications to the Andasy platform using the Andasy CLI. It does so by building image using local or remote Docker and then push image to our registry.
+It supports both remote and local deployment modes, allowing flexibility depending on your workflow and environment.
+
+### Usage
+
+```
+andasy deploy <dir> [flags]
+```
+
+`<dir>` is the path to your codes and it is optional in the case you are already in that path.
+
+#### Flags
+
+- `-a, --app string`  
+  Specifies the target Andasy application to deploy.
+- `-c, --config string`  
+  Path to the application configuration file.
+- `-h, --help`  
+  Displays help information for the deploy command.
+- `-i, --image-label string`  
+  Image label to deploy (useful for versioning or tagging).
+- `-m, --mode string`  
+  Sets the deployment mode: `remote` or `local` (default is `remote`).
+
+### Examples
+
+**Deploy an application remotely:**
+```
+andasy deploy
+```
+
+**Deploy with a custom directory and config path:**
+```
+andasy deploy ./my-app-location -a my-app-name -c ./config.hcl
+```
+
+**Deploy using local Docker:**
+```
+andasy deploy ./my-app -a my-app-name -m local
+```

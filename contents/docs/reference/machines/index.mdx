@@ -5,6 +5,8 @@ description: Learn how to create and manage machines in Andasy.
 
 Machines are the microVMs that run your applications on the Andasy platform. Your application code is packaged into a container image and deployed to a machine, where it is run in a secure and isolated environment. An application can have multiple machines associated with it, allowing you to scale your application horizontally.
 
+## Listing machines
+
 You can list machines associated with an application in the Andasy CLI by running the following command:
 
 ```bash
@@ -12,3 +14,45 @@ andasy machines list -a <app-name>
 ```
 
 This command will display a list of machines associated with the specified application, along with their state and timestamps. You can use this information to monitor the health and performance of your application.
+
+## Stopping machine
+
+This command will stop a particular machine of a running application.
+
+```bash
+andasy machines stop <machine-id> -a <app-name>
+```
+
+`<machine-id>` is optional. `-a <app-name>` is optional if config.hcl is present.
+
+## Resuming machine
+
+This command will resume a particular machine of provided app service.
+
+```bash
+andasy machines resume <machine-id> -a <app-name>
+```
+
+`<machine-id>` is optional. `-a <app-name>` is optional if config.hcl is present.
+
+## Deleting machine
+
+This command will delete a particular machine of a provided app service.
+
+```bash
+andasy machines delete <machine-id> -a <app-name>
+```
+
+`<machine-id>` is optional. `-a <app-name>` is optional if config.hcl is present.
+
+## View status of a machine
+
+This command reports the live status of an application([ENTRYPOINT](https://docs.docker.com/reference/dockerfile/#entrypoint) or [CMD](https://docs.docker.com/reference/dockerfile/#cmd)) running inside the machine.
+This is should not be regarded as server health checks; Application([ENTRYPOINT](https://docs.docker.com/reference/dockerfile/#entrypoint) or [CMD](https://docs.docker.com/reference/dockerfile/#cmd)) may be running while the server is still starting up or failed to start;
+In this case this command will report running state.
+
+```bash
+andasy machines status <machine-id> -a <app-name>
+```
+
+`<machine-id>` is optional. `-a <app-name>` is optional if config.hcl is present.

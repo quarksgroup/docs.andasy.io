@@ -1,0 +1,43 @@
+---
+title: Logs
+description: Learn how to view logs of an application in Andasy
+---
+
+The `logs` command allows you to watch or tail logs for an entire application or a specific machine within your Andasy deployment. This is useful for monitoring application health, debugging issues, and tracking events in real time. You can filter logs by time, level, and target, and choose between streaming or fetching the latest logs.
+
+## Usage
+
+```bash
+andasy logs [flags]
+```
+
+## Aliases
+
+- `logs`
+- `log`
+
+## Flags
+
+| Flag                  | Description                                                                                       |
+|-----------------------|---------------------------------------------------------------------------------------------------|
+| `-a`, `--app string`  | Specify the target Andasy app.                                                                    |
+| `-f`, `--from string` | Get logs not older than this time. Formats: `y`, `w`, `d`, `h`, `m`, `s` (default: `1h`).        |
+| `-h`, `--help`        | Show help for the logs command.                                                                   |
+| `-l`, `--level string`| Filter logs by level: `error`, `warn`, `info`, `debug` (default: `all`).                         |
+| `-m`, `--machine string` | Specify the target machine app.                                                               |
+| `-t`, `--tail`        | Return only the current logs in the system (does not stream new logs).                            |
+
+
+## Examples
+
+### Tail logs for an app
+
+```bash
+andasy logs --app my-app --tail
+```
+
+### Watch error logs from the last 24 hours
+
+```bash
+andasy logs --level error --from 24h
+```

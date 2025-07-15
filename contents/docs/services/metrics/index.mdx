@@ -1,0 +1,79 @@
+---
+title: Metrics on Andasy.io
+---
+
+The Andasy.io platform includes a fully-managed metrics solution to help you easily monitor your Andasy apps.
+It includes the following components:
+
+- Default metrics viewer is provided which is based on Prometheus at [metrics.andasy.io](https://metrics.andasy.io)
+- Managed Prometheus-compatible time series storage
+- Metrics automatically sent from every Andasy app you deploy
+
+## Prometheus on Andasy.io
+
+[Prometheus](https://prometheus.io/) is a popular open source monitoring system used to store and query metrics efficiently,
+with a stable [HTTP querying API](https://prometheus.io/docs/prometheus/latest/querying/api/) compatible with a range of systems.
+
+**Prometheus on Andasy.io** is a fully-managed service based on [Prometheus](https://prometheus.io/).
+It [supports](https://docs.victoriametrics.com/#prometheus-querying-api-usage) most common Prometheus querying API endpoints:
+- [`/api/v1/query`](https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries)
+- [`/api/v1/query_range`](https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries)
+- [`/api/v1/series`](https://prometheus.io/docs/prometheus/latest/querying/api/#finding-series-by-label-matchers)
+- [`/api/v1/labels`](https://prometheus.io/docs/prometheus/latest/querying/api/#getting-label-names)
+- [`/api/v1/label/<label_name>/values`](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-label-values)
+- [`/api/v1/status/tsdb`](https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-stats)
+- [`/federate`](https://prometheus.io/docs/prometheus/latest/federation/)
+
+Note that [remote read](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_read) (`/api/v1/read`) and [remote storage integration](https://prometheus.io/docs/prometheus/latest/storage/#remote-storage-integrations)
+are not supported.
+
+### MetricsQL
+
+Prometheus queries are typically based on the [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) query language.
+Prometheus on Andasy.io queries use [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/).
+
+
+### Querying
+
+Queries can be sent to the following endpoint:
+```
+https://metrics.andasy.io/
+```
+
+You'll need to authenticate with a  Access Token sent in the [standard](https://www.rfc-editor.org/rfc/rfc6750.html) Bearer Token format (e.g., an HTTP request header `Authorization: <TOKEN>`), and you may only query series scoped to your organizations.
+
+#### Manually
+
+**Get an access token**
+
+```bash
+TOKEN=$(andasy auth token)
+```
+
+**Test it out!**
+
+```bash
+curl https://metrics.andasy.io/api/v1/query \
+  --data-urlencode 'query=sum(increase(cpu_seconds_total)) by (app_name, org_id)' \
+  -H "Authorization: $TOKEN"
+```
+
+### External or self-hosted Grafana
+
+You can also configure your Prometheus endpoint with an existing Grafana installation like this:
+
+1. [Add](https://grafana.com/docs/grafana/latest/datasources/add-a-data-source/) a [Prometheus data source](https://grafana.com/docs/grafana/latest/datasources/prometheus/) (Settings -> Data Sources -> Add data source -> Prometheus)
+2. Fill the form with the following:
+- HTTP -> URL: `https://metrics.andasy.io`
+- Custom HTTP Headers -> + Add Header:
+   - Header: `Authorization`, Value: `Bearer <token>`
+
+You're all set.
+
+### Standard Labels
+
+All published series include the following labels:
+
+- `app_name`: App name
+- `org_id`: Organization ID
+- `machine_id`: Virtual machine ID.
