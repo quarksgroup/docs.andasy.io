@@ -10,12 +10,12 @@ The snapshot commands focus on managing snapshots of a volume. Snapshot is a cop
 The following command lists volume's snapshots attached to a specific application. This also can retrieve the snapshots of a deleted volume in case its ID is known.
 
 ```bash
-andasy volumes snapshots list -a <app-name> <volumeId>
+andasy volumes snapshots list <volumeId> -a <app-name>
 ```
 
 Replace `<app-name>` with the name of the application that owns the volume. Required if `config.hcl` is not present.
 
-Replace `<volumeId>` with the ID of the volume(optional).
+Replace `<volumeId>` with the ID of the volume (optional).
 
 ## Link to download snpashot
 
@@ -23,10 +23,9 @@ The following command makes downloadable link for a volume's snapshot. This Link
 day and should be kept confidential. This also can be used for recently deleted volume in case its ID is known.
 
 ```bash
-andasy volumes snapshots link -a <app-name> <volumeId>
+andasy volumes snapshots link <volumeId> -a <app-name>
 ```
 
 Replace `<app-name>` with the name of the application that owns the volume. Required if `config.hcl` is not present.
 
-Replace `<volumeId>` with the ID of the volume(optional).
-
+Replace `<volumeId>` with the ID of the volume (optional).

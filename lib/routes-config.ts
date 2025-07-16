@@ -18,7 +18,7 @@ export const ROUTES: EachRoute[] = [
         title: "Installation",
         href: "/installation",
       },
-      { title: "Quick Start Guide", href: "/quick-start-guide" },
+      { title: "Quick Start", href: "/quick-start" },
     ],
   },
   {
@@ -31,18 +31,8 @@ export const ROUTES: EachRoute[] = [
       { title: "Apps", href: "/apps" },
       { title: "Setup", href: "/setup" },
       { title: "Deploy", href: "/deploy" },
-      { title: "Machines", href: "/machines" },
-      { title: "Volumes", href: "/volumes" },
-      { title: "Snapshots", href: "/snapshots" },
-      { title: "SSH Sessions", href: "/ssh" },
       { title: "Builder", href: "/builder" },
-      { 
-        title: "Databases", 
-        href: "/databases",
-        items: [
-          { title: "Postgres", href: "/postgres" },
-        ],
-      },
+      { title: "Machines", href: "/machines" },
     ]
   },
   {
@@ -50,8 +40,18 @@ export const ROUTES: EachRoute[] = [
     href: "/services",
     noLink: true,
     items: [
-      { title: "Metrics", href: "/metrics" },
+      { title: "SSH", href: "/ssh" },
       { title: "Logs", href: "/logs" },
+      { title: "Metrics", href: "/metrics" },
+      { title: "Volumes", href: "/volumes" },
+      { title: "Snapshots", href: "/snapshots" },
+      {
+        title: "Databases",
+        href: "/databases",
+        items: [
+          { title: "Postgres", href: "/postgres" },
+        ],
+      },
     ],
   }
 ];

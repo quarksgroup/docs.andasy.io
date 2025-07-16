@@ -39,8 +39,12 @@ andasy volumes delete -a <app-name>
 Replace `<app-name>` with the name of the application that owns the volume. Required if `config.hcl` is not present.
 
 It is advised to keep the ID of this volume since it can be used to download its snapshot. Snapshot of a deleted volume can be retained for a limited time,
-so you havr to download them preferably after 24 hours.
+so you have to download them preferably after 24 hours.
 
 <Note type="warning" title="Warning">
 This volume must not be attached to an existing machine of an app before being deleted.
 </Note>
+
+## Snapshots
+
+Snapshots are point-in-time copies of a volume. They can be used to create a backup of your data or to restore your data to a previous state. Read more about snapshots [here](/docs/services/snapshots).
