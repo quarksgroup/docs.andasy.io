@@ -53,7 +53,15 @@ export const ROUTES: EachRoute[] = [
         ],
       },
     ],
-  }
+  },
+  {
+    title: "workflows",
+    href: "/workflows",
+    noLink: true,
+    items: [
+      { title: "Github Deploy Action", href: "/github-deploy-action" },
+    ],
+  },
 ];
 
 type Page = { title: string; href: string };
