@@ -36,6 +36,13 @@ export const ROUTES: EachRoute[] = [
       { title: "Snapshots", href: "/snapshots" },
       { title: "SSH Sessions", href: "/ssh" },
       { title: "Builder", href: "/builder" },
+      { 
+        title: "Databases", 
+        href: "/databases",
+        items: [
+          { title: "Postgres", href: "/postgres" },
+        ],
+      },
     ]
   },
   {

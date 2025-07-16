@@ -1,0 +1,42 @@
+---
+title: PostgreSQL
+description: Learn how to manage PostgreSQL databases in Andasy.
+---
+
+The `postgres` command allows you to manage PostgreSQL databases as services within Andasy. It provides tools to create and provision PostgreSQL instances for your applications.
+
+This command can be accessed using any of the following aliases:
+
+- `postgres`
+- `pg`
+
+## Usage
+
+```bash
+andasy database postgres
+```
+
+### For creating postgres application service
+
+```bash
+andasy database postgres create -a <app-name> [flags]
+```
+#### You can also use the alias:
+
+```bash
+andasy db pg create [APPNAME]
+```
+
+### Available flags
+
+| Flag              | Description                                                                  |
+|-------------------|------------------------------------------------------------------------------|
+| `--generate-name` | Generate a random app name                                                   |
+| `-a`, `--app`     | The name of the app (**required**)                                           |
+| `-h`, `--help`    | Show help for the command                                                    |
+| `-j`, `--json`    | Output result in JSON format                                                 |
+| `--name`          | The app name to use                                                          |
+| `-o`, `--org`     | Target Andasy organization                                                   |
+| `-p`, `--password`| Superuser password for the database. If not set, a random one will be used   |
+| `-s`, `--size`    | Volume size in GB (default: `1`)                                             |
+| `--volume`        | Volume name (default: `"data-source"`)    
