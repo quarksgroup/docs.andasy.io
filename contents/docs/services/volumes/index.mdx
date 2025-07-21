@@ -17,6 +17,26 @@ Replace `<app-name>` with the name of the application that you want to associate
 
 The volume will be created and associated with the specified application.
 
+## Attaching volume to a machine
+
+Volume are attached to a specific machine of an app in `andasy.hcl` configuration file
+```
+app_name = "app"
+
+app {
+  ...
+  ...
+
+  storage {
+    name = <volume-name>
+    destination = <mountpoint>
+  }
+
+}
+```
+
+`<volume-name>` is the name you provided to your volume during volume create. `<mountpoint>` is the mounting point of your volume.
+
 ## List Volumes
 
 To list all the volumes associated with an application, run the following command:
