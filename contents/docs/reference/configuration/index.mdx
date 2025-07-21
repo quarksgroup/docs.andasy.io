@@ -1,0 +1,175 @@
+---
+title: Configuration file
+description: Learn how to describe your deployment with configuration file.
+---
+
+## Overview
+
+This document describes the HCL (HashiCorp Configuration Language) configuration format used for deploying an app in Andasy. The configuration defines various aspects of the server deployment including resource allocation, networking, and storage.
+
+## Configuration Structure
+
+The configuration file is written in HCL format and defines the following main components:
+
+- **Top-level application name**
+- **Application block with detailed configuration**
+  - Environment variables
+  - Port settings
+  - Compute resources
+  - Process specifications
+  - Storage requirements
+
+## Basic Configuration
+
+```hcl
+app_name = "app"
+
+app {
+  env = {}
+  port = 80
+  
+  compute {
+    cpu = 1
+    memory = 256
+    cpu_kind = "shared"
+  }
+  
+  process {
+    name = "app"
+  }
+  
+  storage {
+    name = <volume-name>
+    destination = <mountpoint>
+  }
+}
+```
+
+## Configuration Reference
+
+### Top-Level Parameters
+
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| `app_name` | String | The name of your application | Yes |
+
+### Application Block Parameters
+
+The `app` block contains the primary configuration for your application deployment.
+
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| `env` | Map | Environment variables to be set for the application | No |
+| `port` | Integer | The port on which the HTTP server will listen | Yes |
+
+### Compute Configuration
+
+The `compute` block defines the resources allocated to your application.
+
+| Parameter | Type | Description | Required | Default |
+|-----------|------|-------------|----------|---------|
+| `cpu` | Integer | Number of CPU units to allocate | Yes | 1 |
+| `memory` | Integer | Memory allocation in MiB | Yes | 256 |
+| `cpu_kind` | String | Type of CPU allocation (e.g., "shared", "dedicated") | Yes | "shared" |
+
+### Process Configuration
+
+The `process` block defines how your application process is managed.
+
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| `name` | String | Name of the process | Yes |
+
+### Storage Configuration
+
+The `storage` block defines any persistent storage required by your application.
+It is only required if you want to attach your volume to an app.
+
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| `name` | String | Name of the volume to mount | Yes |
+| `destination` | String | Mount point within the container filesystem | Yes |
+
+## Usage Examples
+
+### Basic Web Server
+
+```hcl
+app_name = "web-server"
+
+app {
+  env = {
+    NODE_ENV = "production"
+  }
+  port = 80
+  
+  compute {
+    cpu = 1
+    memory = 512
+    cpu_kind = "shared"
+  }
+  
+  process {
+    name = "web"
+  }
+}
+```
+
+### API Server with Storage
+
+```hcl
+app_name = "api-server"
+
+app {
+  env = {
+    DEBUG = "true"
+    LOG_LEVEL = "info"
+  }
+  port = 8080
+  
+  compute {
+    cpu = 2
+    memory = 1024
+    cpu_kind = "shared"
+  }
+  
+  process {
+    name = "api"
+  }
+  
+  storage {
+    name = "data-volume"
+    destination = "/app/data"
+  }
+}
+```
+
+## Best Practices
+
+1. **Resource Allocation**: Match CPU and memory settings to your application's actual needs to optimize costs.
+
+2. **Environment Variables**: Use environment variables for configuration that might change between deployments.
+
+3. **Process Naming**: Use descriptive process names to make monitoring and debugging easier.
+
+4. **Port Configuration**: Ensure the port specified matches the port your application listens on.
+
+5. **Storage**: Only use persistent storage when necessary, as it may increase costs and complexity.
+
+## Common Issues and Troubleshooting
+
+### Application Not Starting
+
+- Verify that the `port` setting matches what your application is configured to use
+- Check that the `memory` allocation is sufficient for your application
+- Ensure any required environment variables are properly set in the `env` map
+
+### Storage Issues
+
+- Confirm the `destination` path is accessible by your application
+- Verify your application has appropriate permissions to read/write to the mounted volume
+- Ensure the `name` references a valid storage volume
+
+## Conclusion
+
+This HCL configuration format provides a clean and declarative way to define your HTTP server deployments in cloud environments. By properly configuring compute resources, networking, and storage, you can ensure your application runs efficiently and reliably.
