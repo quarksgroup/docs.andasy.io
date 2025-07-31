@@ -13,11 +13,6 @@ export const ROUTES: EachRoute[] = [
     href: "/getting-started",
     noLink: true,
     items: [
-      { title: "Introduction", href: "/introduction" },
-      {
-        title: "Installation",
-        href: "/installation",
-      },
       { title: "Quick Start", href: "/quick-start" },
     ],
   },
@@ -28,7 +23,7 @@ export const ROUTES: EachRoute[] = [
     items: [
       { title: "Authentication", href: "/authentication" },
       { title: "Organizations", href: "/organizations" },
-       { title: "Config file", href: "/configuration" },
+      { title: "Config file", href: "/configuration" },
       { title: "Apps", href: "/apps" },
       { title: "Setup", href: "/setup" },
       { title: "Deploy", href: "/deploy" },

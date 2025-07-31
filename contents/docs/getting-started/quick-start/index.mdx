@@ -1,69 +1,114 @@
 ---
-title: Quick Start Guide
-description: Learn how to get started with Andasy and deploy your first application.
+title: Getting Started
+description: Quickstart guide to deploy your first app on Andasy.
 ---
 
-This guide will help you get started with Andasy and deploy your first application. Before you begin, make sure you have the following prerequisites:
+**Andasy** is a modern cloud Platform-as-a-Service (PaaS) that helps developers deploy and manage applications without touching infrastructure. Whether you're running a simple API or a complex web app, Andasy handles builds, deployments, networking, scaling, and observability—so you don’t have to.
 
-- An Andasy account. If you don't have one, you can sign up for free [here](https://andasy.io/auth/register).
-- The Andasy CLI installed on your local machine. Check out the [installation guide](/docs/getting-started/installation) for more information.
-- A basic understanding of Docker and how to create a `Dockerfile` for your application.
+## Why Andasy?
 
-## Deploying Your First Application
+Andasy simplifies app deployment by letting you:
 
-To deploy your first application on Andasy, you need to first log in to your Andasy account using the following command:
+- **Zero DevOps Overhead:** No containers, Kubernetes, or YAML required.
+- **Private Container Registry:** Your apps are automatically built and stored securely.
+- **Run anything** — Works with any language or framework using a `Dockerfile`.
+- **Get built-in CI/CD** — Apps are rebuilt and redeployed on code changes.
+- **Custom Domains & SSL:** Easily connect your own domains with automatic SSL.
+
+## Quickstart
+
+Ready to launch your app on Andasy? First, install the **Andasy CLI**.
+
+### 1. Install the CLI
+
+The **Andasy CLI** is your main interface for deploying and managing applications. To install it:
+
+#### macOS / Linux
+
+```bash
+curl -fsSL https://andasy.io/install.sh | bash
+```
+
+#### Windows (PowerShell)
+
+```powershell
+iwr -useb https://andasy.io/install.ps1 | iex
+```
+
+After installation, verify it’s working:
+
+```bash
+andasy version
+```
+
+> 💡 If you're on macOS or Linux, you may need to restart your terminal or run `source ~/.bashrc` to activate the CLI.
+
+### 2. Create an Account
+
+If you haven’t already, [sign up for a free Andasy account](https://andasy.io/auth/register).
+
+Once registered, log in via the CLI:
 
 ```bash
 andasy auth login
 ```
 
-### Step 1: Create a New Project
+### 3. Deploy Your First App
 
-In order to deploy an application on Andasy, you need to create a new project. A project must contain the source code of your application and a `Dockerfile` that specifies how to build the application.
+You can deploy any app that includes a `Dockerfile`. If you don’t have one, Andasy will generate it for you.
 
-To initialize andasy in your project, run the following command in your terminal:
+#### Step 1: Set Up the Project
+
+Run this inside your project directory:
 
 ```bash
 andasy setup
 ```
 
-This will create an application on andasy and try to detect the type of application you are trying to deploy and generate a Dockerfile for you.
+This:
+- Detects your stack and creates a `Dockerfile` (if missing)
+- Registers your app on Andasy
+- Generates a `andasy.hcl` file to define your deployment
 
-After the project is created, it will write a `config.hcl` file in your project directory with the necessary information for your application deployment. Double-check the configuration to ensure it is correct with the right port for your application.
+> 💡 Check that the `andasy.hcl` has the right port and settings for your app.
 
-### Step 2: Deploy Your Application
+#### Step 2: Deploy
 
-Once you have created your project, you can deploy it to Andasy by running the following command:
+To build and deploy your app, run:
 
 ```bash
 andasy deploy
 ```
 
-This command will package your application, send it to a remote builder, and deploy it to the Andasy platform.
+Andasy will:
+- Package your code
+- Build it remotely
+- Push the image to your private registry
+- Deploy the container and assign a URL
 
-If you want to build your application locally, you can use the following command:
+Want to build locally?
 
 ```bash
 andasy build --mode local
+andasy deploy --image-label <your-local-image-url>
 ```
 
-This will build your application image locally and push it to our registry.
+#### Step 3: Visit Your App
 
-You can deploy your application by just providing the application docker image URL:
+After deploying, the CLI will display your app's live URL, usually:
 
-```bash
-andasy deploy --image-label <image-url>
+```
+https://<your-app-name>.andasy.dev
 ```
 
-### Step 3: Access Your Application
+## What's Next?
 
-After your application has been deployed, you can access it by visiting the URL displayed in the output of the `andasy deploy` command or go to `https://<app_name>.andasy.dev`.
+Now that you're live, you can:
+- [**SSH into your app**](/docs/services/ssh) for debugging
+- Use [**andasy logs**](/docs/services/logs) to view real-time output
+- Add [**environment variables**](/docs/reference/secrets), secrets, or scale services
 
-Congratulations! You have successfully deployed your first application on Andasy.
+Need help? Visit [support.andasy.io](https://support.andasy.io).
 
-## Next Steps
 
-Now that you have deployed your first application on Andasy, you can explore the various features and capabilities of the platform. Here are some next steps you can take:
-
-- Learn how you can ssh into your application container.
-- Explore the various features of the Andasy platform, such as custom domains, SSL certificates, and more.
+**Andasy makes deployment feel like magic. Try it today and ship faster—with fewer headaches.**

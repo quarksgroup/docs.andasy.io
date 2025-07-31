@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/",
-        destination: "/docs/getting-started/introduction",
+        destination: "/docs/getting-started/quick-start",
         permanent: false,
       },
     ];
