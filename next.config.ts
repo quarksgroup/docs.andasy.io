@@ -10,6 +10,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/docs/getting-started/introduction",
+        permanent: false,
+      },
+    ];
+  },
   // if used turbopack
   // transpilePackages: ["next-mdx-remote"],
 };
