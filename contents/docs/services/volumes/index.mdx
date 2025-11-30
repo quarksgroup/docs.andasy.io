@@ -56,7 +56,7 @@ To delete a volume associated with an application, run the following command:
 ```bash
 andasy volumes delete -a <app-name>
 ```
-Replace `<app-name>` with the name of the application that owns the volume. Required if `config.hcl` is not present.
+Replace `<app-name>` with the name of the application that owns the volume. Required if `andasy.hcl` is not present.
 
 It is advised to keep the ID of this volume since it can be used to download its snapshot. Snapshot of a deleted volume can be retained for a limited time,
 so you have to download them preferably after 24 hours.

@@ -38,6 +38,7 @@ export const ROUTES: EachRoute[] = [
     noLink: true,
     items: [
       { title: "SSH", href: "/ssh" },
+      { title: "Proxy", href: "/proxy" },
       { title: "Logs", href: "/logs" },
       { title: "Metrics", href: "/metrics" },
       { title: "Volumes", href: "/volumes" },
