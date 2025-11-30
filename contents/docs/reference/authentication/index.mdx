@@ -3,38 +3,99 @@ title: Authentication
 description: Learn how to authenticate with Andasy and manage your account.
 ---
 
-To use the Andasy CLI and deploy applications to the Andasy platform, you need to authenticate with your Andasy account. This guide will walk you through the process of authenticating with Andasy and managing your account.
+# Authentication
+
+To use the Andasy CLI and deploy applications to the Andasy platform, you need to authenticate with your Andasy account. **Authentication** is the process of proving your identity to Andasy. Once authenticated, you can:
+
+- Deploy and manage applications
+- Access your organization's resources
+- View logs, metrics, and other application data
+- Manage team members and permissions
+- Generate access tokens for API access
+
+Your authentication session persists until you explicitly log out or the session expires. You only need to authenticate once per machine unless you log out.
 
 ## Logging In
 
-To log in to your Andasy account, run the following command in your terminal:
+To log in to your Andasy account, run:
 
 ```bash
 andasy auth login
 ```
 
-This command will open a browser window where you can enter your Andasy credentials. Once you have successfully logged in, you will be able to use the Andasy CLI to deploy applications to the Andasy platform.
+This command opens a browser window where you can enter your Andasy credentials. Once you successfully log in, you'll be able to use the Andasy CLI to deploy and manage applications.
 
-### Using interactive mode
+### Interactive Mode (Terminal-Based)
 
-To log in using interactive mode, run the following command:
+If you prefer not to use a browser, use interactive mode:
 
 ```bash
 andasy auth login --interactive
 ```
 
-This command will prompt you to enter your Andasy credentials in the terminal.
+This prompts you to enter your email and password directly in the terminal. Useful for:
+- Remote servers without browser access
+- Automated scripts (though tokens are preferred for automation)
+- Terminal-only environments
 
-or you can pass email and password directly using flags (not recommended)
+### Direct Credentials (Not Recommended)
+
+You can pass credentials directly via flags, but this is **not recommended** for security reasons:
 
 ```bash
 andasy auth login --email <email> --password <password>
 ```
 
+**Security concerns:**
+- Passwords may appear in command history
+- Credentials visible in process lists
+- Risk of exposure in shared environments
+
+Use browser or interactive mode instead, or use access tokens for automation (see below).
+
+## Getting Access Tokens
+
+For automation, CI/CD pipelines, or API access, use access tokens instead of password authentication:
+
+```bash
+andasy auth token
+```
+
+This generates an access token that you can use for:
+- API requests (include as `Authorization: Bearer <token>` header)
+- CI/CD pipelines (store as a secret)
+- External tooling integration
+
+Tokens are more secure than passwords for automated use cases.
+
 ## Logging Out
 
-To log out of your Andasy account, run the following command:
+To log out of your Andasy account:
 
 ```bash
 andasy auth logout
 ```
+
+This invalidates your current session and requires you to log in again to use the CLI. Useful when:
+- Switching between accounts
+- Using a shared machine
+- Ending a work session
+
+## Checking Authentication Status
+
+Verify if you're currently authenticated:
+
+```bash
+andasy auth status
+```
+
+This shows:
+- Whether you're logged in
+- Your account email
+- Current organization (if set)
+- Session expiration information
+
+## Related Documentation
+
+- [Organizations](/docs/reference/organizations) - Manage organizations after authentication
+- [GitHub Deploy Action](/docs/workflows/github-deploy-action) - Use tokens for CI/CD automation

@@ -3,21 +3,23 @@ title: Config file
 description: Learn how to describe your deployment with configuration file.
 ---
 
-## Overview
+# Configuration File
 
-This document describes the HCL (HashiCorp Configuration Language) configuration format used for deploying an app in Andasy. The configuration defines various aspects of the server deployment including resource allocation, networking, and storage.
+The `andasy.hcl` configuration file is the central place where you define how your application should be deployed on Andasy. This file uses **HCL (HashiCorp Configuration Language)**, a human-readable configuration language that's easy to write and understand.
+
+The configuration file is typically created automatically when you run `andasy setup`, but you can also create or modify it manually to customize your deployment. It defines various aspects of your server deployment including resource allocation, networking, and storage.
 
 ## Configuration Structure
 
 The configuration file is written in HCL format and defines the following main components:
 
-- **Top-level application name**
-- **Application block with detailed configuration**
-  - Environment variables
-  - Port settings
-  - Compute resources
-  - Process specifications
-  - Storage requirements
+- **Top-level application name** - Identifies your application on the platform
+- **Application block** - Contains the detailed deployment configuration:
+  - **Environment variables** - Key-value pairs available to your application at runtime
+  - **Port settings** - The port your application listens on for incoming connections
+  - **Compute resources** - CPU and memory allocation for your application
+  - **Process specifications** - How your application process is named and managed
+  - **Storage requirements** - Persistent storage volumes attached to your application (optional)
 
 ## Basic Configuration
 
@@ -51,44 +53,45 @@ app {
 
 | Parameter | Type | Description | Required |
 |-----------|------|-------------|----------|
-| `app_name` | String | The name of your application | Yes |
+| `app_name` | String | The name of your application. This must match the application name registered with Andasy. | Yes |
 
 ### Application Block Parameters
 
-The `app` block contains the primary configuration for your application deployment.
+The `app` block contains the primary configuration for your application deployment. This block defines how your application runs, what resources it has access to, and how it communicates.
 
 | Parameter | Type | Description | Required |
 |-----------|------|-------------|----------|
-| `env` | Map | Environment variables to be set for the application | No |
-| `port` | Integer | The port on which the HTTP server will listen | Yes |
+| `env` | Map | Environment variables to be set for the application. These are key-value pairs that your application can access at runtime. For sensitive data, use [secrets](/docs/reference/secrets) instead. | No |
+| `port` | Integer | The port on which your application listens for incoming HTTP traffic. This must match the port your application code is configured to use. Andasy will route external traffic to this port. | Yes |
 
 ### Compute Configuration
 
-The `compute` block defines the resources allocated to your application.
+The `compute` block defines the computational resources (CPU and memory) allocated to your application. These settings determine how much processing power and RAM your application has available.
 
 | Parameter | Type | Description | Required | Default |
 |-----------|------|-------------|----------|---------|
-| `cpu` | Integer | Number of CPU units to allocate | Yes | 1 |
-| `memory` | Integer | Memory allocation in MiB | Yes | 256 |
-| `cpu_kind` | String | Type of CPU allocation (e.g., "shared", "dedicated") | Yes | "shared" |
+| `cpu` | Integer | Number of CPU units to allocate. Each unit represents a portion of a CPU core. More CPU units allow your application to handle more concurrent operations. | Yes | 1 |
+| `memory` | Integer | Memory allocation in **MiB** (Mebibytes, where 1 MiB = 1024 KiB). This is the maximum RAM your application can use. If your application exceeds this limit, it may be terminated. | Yes | 256 |
+| `cpu_kind` | String | Type of CPU allocation. `"shared"` means CPU time is shared with other applications (more cost-effective). `"dedicated"` provides guaranteed CPU resources (better performance, higher cost). | Yes | "shared" |
 
 ### Process Configuration
 
-The `process` block defines how your application process is managed.
+The `process` block defines how your application process is identified and managed. The process name is used for monitoring, logging, and process management.
 
 | Parameter | Type | Description | Required |
 |-----------|------|-------------|----------|
-| `name` | String | Name of the process | Yes |
+| `name` | String | Name of the process. This identifier is used in logs, metrics, and when managing your application. Choose a descriptive name that helps identify what this process does (e.g., "web", "api", "worker"). | Yes |
 
 ### Storage Configuration
 
-The `storage` block defines any persistent storage required by your application.
-It is only required if you want to attach your volume to an app.
+The `storage` block defines persistent storage volumes that are attached to your application. **Persistent storage** retains data even when your application restarts or machines are recreated, making it essential for databases, file uploads, or any data that must survive restarts.
+
+This block is optional. Only include it if you need persistent storage. You must create the volume first using `andasy volumes create` before referencing it here.
 
 | Parameter | Type | Description | Required |
 |-----------|------|-------------|----------|
-| `name` | String | Name of the volume to mount | Yes |
-| `destination` | String | Mount point within the container filesystem | Yes |
+| `name` | String | Name of the volume to mount. This must match a volume you've created using `andasy volumes create`. | Yes |
+| `destination` | String | **Mount point** within the container filesystem where the volume will be accessible. This is the directory path where your application can read and write persistent data (e.g., `/app/data`, `/var/lib/postgresql/data`). | Yes |
 
 ## Usage Examples
 

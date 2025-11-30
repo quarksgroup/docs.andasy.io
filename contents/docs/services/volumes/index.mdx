@@ -3,7 +3,36 @@ title: Volumes
 description: Learn how to create and manage volumes in Andasy.
 ---
 
-Volumes are persistent storage resources that can be attached to machines in Andasy. They allow you to store data that needs to persist across machine restarts and scale your application horizontally by sharing data between multiple machines.
+# Volumes
+
+Volumes are **persistent storage** resources that can be attached to machines in Andasy. They provide a way to store data that persists even when machines restart or are recreated.
+
+## What is Persistent Storage?
+
+By default, the filesystem in a container is **ephemeral**. When a container stops or is recreated, all data written to the filesystem is lost. **Persistent storage** (volumes) solves this by providing a separate storage area that:
+
+- **Survives restarts** - Data remains even when machines restart
+- **Survives recreations** - Data persists when machines are recreated or updated
+- **Is backed up** - Andasy automatically creates snapshots of volumes
+
+## When Do You Need Volumes?
+
+Use volumes when your application needs to store data that must persist, such as:
+
+- **Database files** - PostgreSQL, MySQL, SQLite data files
+- **File uploads** - User-uploaded images, documents, or media
+- **Application data** - Cached content, generated reports, or configuration files
+- **Log files** - Long-term log storage (though logs are also available via `andasy logs`)
+
+You **don't need** volumes for:
+- Temporary files or caches that can be regenerated
+- Application code (already in the container image)
+- Environment variables (handled via configuration)
+- Most stateless applications
+
+## How Volumes Work
+
+Volumes are created independently of machines and can be attached to a machine. When attached, a volume appears as a directory (mount point) in your container's filesystem. Your application can read and write to this directory, and the data persists across container restarts.
 
 ## Creating a Volume
 
@@ -13,29 +42,47 @@ To create a volume using the Andasy CLI, run the following command in your termi
 andasy volumes create -a <app-name> -s <size> <volume-name>
 ```
 
-Replace `<app-name>` with the name of the application that you want to associate the volume with, `<size>` with the size of the volume in MB, and `<volume-name>` with the name of the volume.
+Parameters:
+- `<app-name>` - The name of the application to associate the volume with
+- `<size>` - The size of the volume in **MB** (Mebibytes). Choose a size that accommodates your current needs plus room for growth
+- `<volume-name>` - A descriptive name for the volume (e.g., `database-data`, `uploads`, `app-storage`)
 
-The volume will be created and associated with the specified application.
+The volume will be created and associated with the specified application. Note that creating a volume doesn't automatically attach it to your machine. You need to configure the attachment in your `andasy.hcl` file (see below).
 
-## Attaching volume to a machine
+<Note type="info" title="Volume Sizing">
+Choose your volume size carefully. While you can create snapshots and restore from them, resizing volumes typically requires creating a new volume and migrating data. Start with a reasonable estimate and monitor usage.
+</Note>
 
-Volume are attached to a specific machine of an app in `andasy.hcl` configuration file
-```
-app_name = "app"
+## Attaching a Volume to Machines
+
+Volumes are attached to machines through the `andasy.hcl` configuration file. When you deploy your application, Andasy automatically attaches the volume to all machines running your application.
+
+Add a `storage` block to your `app` configuration:
+
+```hcl
+app_name = "my-app"
 
 app {
-  ...
-  ...
+  port = 80
+  # ... other configuration ...
 
   storage {
-    name = <volume-name>
-    destination = <mountpoint>
+    name = "database-data"
+    destination = "/var/lib/postgresql/data"
   }
-
 }
 ```
 
-`<volume-name>` is the name you provided to your volume during volume create. `<mountpoint>` is the mounting point of your volume.
+Configuration parameters:
+- `name` - The name of the volume you created (must match exactly)
+- `destination` - The **mount point**—the directory path inside the container where the volume will be accessible
+
+The mount point is where your application will read and write persistent data. Choose a path that:
+- Doesn't conflict with system directories
+- Matches your application's expectations (e.g., database data directories)
+- Is clearly named for clarity (e.g., `/app/data`, `/var/lib/app/storage`)
+
+After updating your `andasy.hcl` file, redeploy your application for the volume attachment to take effect.
 
 ## List Volumes
 
@@ -49,21 +96,34 @@ Replace `<app-name>` with the name of the application that you want to list volu
 
 This command will display a list of all the volumes associated with the specified application.
 
-## Deleting a volume
+## Deleting a Volume
 
 To delete a volume associated with an application, run the following command:
 
 ```bash
-andasy volumes delete -a <app-name>
+andasy volumes delete -a <app-name> <volume-id>
 ```
-Replace `<app-name>` with the name of the application that owns the volume. Required if `andasy.hcl` is not present.
 
-It is advised to keep the ID of this volume since it can be used to download its snapshot. Snapshot of a deleted volume can be retained for a limited time,
-so you have to download them preferably after 24 hours.
+Parameters:
+- `<app-name>` - The name of the application that owns the volume (required if `andasy.hcl` is not present)
+- `<volume-id>` - The ID of the volume to delete (optional if only one volume exists)
 
-<Note type="warning" title="Warning">
-This volume must not be attached to an existing machine of an app before being deleted.
+<Note type="warning" title="Important Requirements">
+Before deleting a volume:
+1. **Detach the volume** - Remove the `storage` block from your `andasy.hcl` and redeploy, or stop all machines using the volume
+2. **Backup important data** - Once deleted, the volume and its data cannot be recovered
+3. **Save the volume ID** - You'll need it to download snapshots after deletion
 </Note>
+
+### Snapshots After Deletion
+
+When a volume is deleted, Andasy retains snapshots for a limited time. To download these snapshots:
+
+1. **Save the volume ID** before deletion (use `andasy volumes list` to get it)
+2. **Wait 24 hours** - Snapshots are typically available after this period
+3. **Download using the volume ID** - Use [`andasy volumes snapshots`](/docs/services/snapshots) commands with the saved volume ID
+
+Snapshots of deleted volumes are retained for a limited time, so download them promptly if you need the data.
 
 ## Snapshots
 

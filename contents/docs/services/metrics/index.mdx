@@ -2,20 +2,42 @@
 title: Metrics on Andasy.io
 ---
 
-The Andasy.io platform includes a fully-managed metrics solution to help you easily monitor your Andasy apps.
-It includes the following components:
+# Metrics and Monitoring
 
-- Default metrics viewer is provided which is based on Prometheus at [metrics.andasy.io](https://metrics.andasy.io)
-- Managed Prometheus-compatible time series storage
-- Metrics automatically sent from every Andasy app you deploy
+The Andasy platform includes a fully-managed metrics solution to help you monitor your applications' performance and health. **Metrics** are numerical measurements collected over time that describe your application's behavior and performance, such as CPU usage, memory consumption, request rates, and error counts.
+
+Unlike logs (which are text messages), metrics are structured data points that can be:
+
+- **Aggregated** - Combined across multiple machines or time periods
+- **Graphed** - Visualized as charts and dashboards
+- **Alerted on** - Used to trigger alerts when thresholds are exceeded
+- **Queried** - Analyzed using query languages like PromQL
+
+Andasy automatically collects metrics from every application you deploy, so you can monitor performance without additional instrumentation.
+
+## Metrics Components
+
+The Andasy metrics solution includes:
+
+- **Metrics viewer** - A web-based interface at [metrics.andasy.io](https://metrics.andasy.io) for viewing and querying metrics
+- **Prometheus-compatible storage** - Managed time-series database that stores your metrics
+- **Automatic collection** - Metrics are automatically sent from every Andasy app you deploy
+- **Standard labels** - All metrics include labels like `app_name`, `org_id`, and `machine_id` for filtering and grouping
 
 ## Prometheus on Andasy.io
 
-[Prometheus](https://prometheus.io/) is a popular open source monitoring system used to store and query metrics efficiently,
-with a stable [HTTP querying API](https://prometheus.io/docs/prometheus/latest/querying/api/) compatible with a range of systems.
+**Prometheus** is a popular open-source monitoring system used to store and query metrics efficiently. Andasy provides a fully-managed Prometheus-compatible service, so you get the power of Prometheus without managing the infrastructure yourself.
 
-**Prometheus on Andasy.io** is a fully-managed service based on [Prometheus](https://prometheus.io/).
-It [supports](https://docs.victoriametrics.com/#prometheus-querying-api-usage) most common Prometheus querying API endpoints:
+### What is Prometheus?
+
+[Prometheus](https://prometheus.io/) is a time-series database designed for monitoring. It:
+
+- Stores metrics as time-series data (values over time)
+- Provides a powerful query language (PromQL) for analyzing metrics
+- Offers a stable HTTP API for querying and integration
+- Is widely supported by monitoring tools and dashboards
+
+**Prometheus on Andasy.io** is a fully-managed service that [supports](https://docs.victoriametrics.com/#prometheus-querying-api-usage) most common Prometheus querying API endpoints:
 - [`/api/v1/query`](https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries)
 - [`/api/v1/query_range`](https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries)
 - [`/api/v1/series`](https://prometheus.io/docs/prometheus/latest/querying/api/#finding-series-by-label-matchers)
@@ -33,14 +55,17 @@ Prometheus queries are typically based on the [PromQL](https://prometheus.io/doc
 Prometheus on Andasy.io queries use [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/).
 
 
-### Querying
+### Querying Metrics
 
 Queries can be sent to the following endpoint:
+
 ```
 https://metrics.andasy.io/
 ```
 
-You'll need to authenticate with a  Access Token sent in the [standard](https://www.rfc-editor.org/rfc/rfc6750.html) Bearer Token format (e.g., an HTTP request header `Authorization: <TOKEN>`), and you may only query series scoped to your organizations.
+**Authentication**: You'll need to authenticate using an Access Token sent in the [standard](https://www.rfc-editor.org/rfc/rfc6750.html) Bearer Token format. Include it as an HTTP header: `Authorization: Bearer <TOKEN>`. You can only query metrics for applications in your organizations.
+
+**Getting an Access Token**: Use `andasy auth token` to get your access token.
 
 #### Manually
 
@@ -72,8 +97,45 @@ You're all set.
 
 ### Standard Labels
 
-All published series include the following labels:
+All published metrics include the following labels, which you can use to filter and group metrics:
 
-- `app_name`: App name
-- `org_id`: Organization ID
-- `machine_id`: Virtual machine ID.
+- **`app_name`** - The name of your application
+- **`org_id`** - Your organization ID (useful for multi-org accounts)
+- **`machine_id`** - The ID of the specific machine (useful for comparing performance across machines)
+
+These labels allow you to query metrics for specific applications, compare performance across machines, or aggregate metrics across your entire organization.
+
+## Common Use Cases
+
+### Monitor CPU Usage
+
+```bash
+TOKEN=$(andasy auth token)
+curl https://metrics.andasy.io/api/v1/query \
+  --data-urlencode 'query=avg(cpu_usage_percent) by (app_name)' \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Track Request Rates
+
+```bash
+TOKEN=$(andasy auth token)
+curl https://metrics.andasy.io/api/v1/query \
+  --data-urlencode 'query=rate(http_requests_total[5m]) by (app_name)' \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Monitor Memory Usage
+
+```bash
+TOKEN=$(andasy auth token)
+curl https://metrics.andasy.io/api/v1/query \
+  --data-urlencode 'query=avg(memory_usage_bytes) by (app_name)' \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## Related Documentation
+
+- [Logs](/docs/services/logs) - View application logs for detailed event information
+- [Apps](/docs/reference/apps) - Manage your applications
+- [Prometheus Querying Basics](https://prometheus.io/docs/prometheus/latest/querying/basics/) - Learn PromQL for advanced queries

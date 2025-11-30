@@ -3,7 +3,35 @@ title: Apps
 description: Learn how to create and manage applications in Andasy.
 ---
 
-Applications are the building blocks of Andasy. They are the projects that you deploy to the Andasy platform and run in the cloud. Applications can be created and managed using the Andasy CLI.
+# Applications in Andasy
+
+Applications are the building blocks of Andasy. They represent your deployed projects running on the Andasy platform. An application is essentially a logical grouping that contains your code, configuration, and the machines (virtual servers) that run it.
+
+## What is an Application?
+
+In Andasy, an **application** is a containerized service that you deploy and manage. Think of it as your project's identity on the platform. It has a name, configuration, and can have one or more machines running instances of your code.
+
+Key characteristics of applications:
+
+- **One codebase, one application** - Each application typically corresponds to a single codebase or service
+- **Shared configuration** - All machines in an application share the same configuration (defined in `andasy.hcl`)
+- **Independent lifecycle** - Each application can be deployed, updated, restarted, or deleted independently
+
+## Application Lifecycle
+
+1. **Create** - Register your application with Andasy (often done automatically by `andasy setup`)
+2. **Configure** - Define settings in `andasy.hcl` (resources, ports, environment variables)
+3. **Deploy** - Build and deploy your code to machines
+4. **Manage** - Monitor, restart, or update your application as needed
+
+## Applications vs Machines
+
+It's helpful to understand the relationship between applications and machines:
+
+- **Application** = The logical service (e.g., "my-api", "web-frontend")
+- **Machine** = A virtual server instance running your application code
+
+When you deploy an application, Andasy creates at least one machine to run it. You can then add more machines as needed. See the [Machines documentation](/docs/reference/machines) for details on managing individual machine instances.
 
 ## Creating an Application
 
@@ -49,11 +77,18 @@ Replace `<app-name>` with the name of the application that you want to restart. 
 
 ## Delete an app
 
-Delete is responsible to remove and delete application even all of it's volumes if there is any this action is not
-reversible.
+The delete command permanently removes an application and all associated resources. This includes:
+
+- All machines running the application
+- All volumes attached to the application
+- All configuration and metadata
+
+<Note type="warning" title="Warning">
+This action is **irreversible**. Once deleted, you cannot recover the application, its data, or its volumes. Make sure you have backups of any important data before deleting an application.
+</Note>
 
 ```bash
- andasy apps delete -a <app-name>
+andasy apps delete -a <app-name>
 ```
 
-Replace `<app-name>` with the name of the application that you want to view detailed information about. if you currently are in the root directory of the application, you can omit the `-a` flag as long as a `andasy.hcl` file exists in the root directory.
+Replace `<app-name>` with the name of the application that you want to delete. If you currently are in the root directory of the application, you can omit the `-a` flag as long as a `andasy.hcl` file exists in the root directory.

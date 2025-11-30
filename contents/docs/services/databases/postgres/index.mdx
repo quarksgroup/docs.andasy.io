@@ -3,7 +3,42 @@ title: PostgreSQL
 description: Learn how to manage PostgreSQL databases in Andasy.
 ---
 
-The `postgres` command allows you to manage PostgreSQL databases as services within Andasy. It provides tools to create and provision PostgreSQL instances for your applications.
+# PostgreSQL Database Service
+
+The `postgres` command allows you to provision and manage PostgreSQL databases as services within Andasy. PostgreSQL is a powerful, open-source relational database that's widely used for web applications, APIs, and data-driven services.
+
+## What is a Database Service?
+
+A **database service** in Andasy is a PostgreSQL instance that runs as a separate application on the platform. When you create a PostgreSQL service, Andasy handles the **initial setup**:
+
+- A new application is created specifically for the database
+- PostgreSQL is automatically installed and configured
+- A volume is created for persistent data storage
+- Connection credentials are generated automatically
+- The database is accessible via the Andasy private network
+
+<Note type="info" title="You Manage PostgreSQL">
+While Andasy handles the initial setup and installation, **you are responsible for managing PostgreSQL**. This includes:
+- Database backups and restores
+- PostgreSQL configuration and tuning
+- Database updates and maintenance
+- User and permission management
+- Performance monitoring and optimization
+
+You can manage PostgreSQL through SSH access (`andasy ssh`) or by connecting with standard PostgreSQL tools.
+</Note>
+
+## When to Use PostgreSQL Service
+
+Use the PostgreSQL service when your application needs:
+
+- **Relational data** - Structured data with relationships (users, orders, products, etc.)
+- **ACID transactions** - Guaranteed data consistency and reliability
+- **SQL queries** - Complex queries and data analysis
+- **Data integrity** - Foreign keys, constraints, and validation
+- **Concurrent access** - Multiple applications or services accessing the same database
+
+The PostgreSQL service is ideal for web applications, APIs, content management systems, e-commerce platforms, and any application that requires reliable, structured data storage.
 
 This command can be accessed using any of the following aliases:
 
@@ -16,27 +51,77 @@ This command can be accessed using any of the following aliases:
 andasy database postgres
 ```
 
-### For creating postgres application service
+## Creating a PostgreSQL Service
+
+To create a PostgreSQL database service, run:
 
 ```bash
 andasy database postgres create -a <app-name> [flags]
 ```
-#### You can also use the alias:
+
+You can also use the shorter alias:
 
 ```bash
-andasy db pg create [APPNAME]
+andasy db pg create -a <app-name> [flags]
 ```
 
-### Available flags
+### Available Flags
 
 | Flag              | Description                                                                  |
 |-------------------|------------------------------------------------------------------------------|
-| `--generate-name` | Generate a random app name                                                   |
-| `-a`, `--app`     | The name of the app (**required**)                                           |
+| `--generate-name` | Generate a random app name for the database service                         |
+| `-a`, `--app`     | The name of the app (**required**). This will be the name of your database service |
 | `-h`, `--help`    | Show help for the command                                                    |
 | `-j`, `--json`    | Output result in JSON format                                                 |
-| `--name`          | The app name to use                                                          |
-| `-o`, `--org`     | Target Andasy organization                                                   |
-| `-p`, `--password`| Superuser password for the database. If not set, a random one will be used   |
-| `-s`, `--size`    | Volume size in GB (default: `1`)                                             |
-| `--volume`        | Volume name (default: `"data-source"`)    
+| `--name`          | The app name to use (alternative to `-a`)                                    |
+| `-o`, `--org`     | Target Andasy organization (required if you belong to multiple organizations) |
+| `-p`, `--password`| Superuser password for the database. If not set, a random secure password will be generated |
+| `-s`, `--size`    | Volume size in **GB** for database storage (default: `1`). Choose based on your data needs |
+| `--volume`        | Volume name for database data storage (default: `"data-source"`)             |
+
+## Connecting to Your PostgreSQL Database
+
+After creating a PostgreSQL service, you'll need connection information to connect your application. The database is accessible via:
+
+- **Host**: The database service's private network address (use the <app-name>.internal domain)
+- **Port**: `5432` (standard PostgreSQL port)
+- **Database**: `postgres` (default database)
+- **User**: `postgres` (superuser)
+- **Password**: The password you set (or the generated one)
+
+### Connection Details
+
+Database connection details are displayed once after creating the service. Make sure to save them as you won't be able to retrieve them after the service is created.
+
+### Connecting from Your Application
+
+Your application can connect to the PostgreSQL service using standard PostgreSQL connection libraries. The connection string format is:
+
+```
+postgresql://postgres:PASSWORD@<app-name>.internal:5432/postgres
+```
+
+Replace:
+- `PASSWORD` with your database password
+- `<app-name>` with your PostgreSQL service app name
+
+Since both your application and the database run on Andasy's private network, you can connect directly using the service's app name as the hostname.
+
+## Managing Your PostgreSQL Service
+
+Once created, your PostgreSQL service is a regular Andasy application. You manage PostgreSQL yourself through:
+
+- **SSH access**: `andasy ssh -a <db-app-name>` to access the machine and run `psql` commands
+- **Direct connection**: Connect using PostgreSQL clients (psql, pgAdmin, etc.) via the [proxy command](/docs/services/proxy) or private network
+- **Application management**: Use standard Andasy commands to manage the underlying application:
+  - **View logs**: `andasy logs -a <db-app-name>`
+  - **Restart**: `andasy apps restart -a <db-app-name>`
+
+You're responsible for PostgreSQL-specific tasks like creating databases, managing users, configuring PostgreSQL settings, performing backups, and handling updates.
+
+## Related Documentation
+
+- [Volumes](/docs/services/volumes) - Learn about persistent storage for databases
+- [Proxy](/docs/services/proxy) - Connect to your database from your local machine for development
+- [Secrets](/docs/reference/secrets) - Securely store database credentials
+- [Apps](/docs/reference/apps) - General application management    

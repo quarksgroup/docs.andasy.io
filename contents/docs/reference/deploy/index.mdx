@@ -3,46 +3,144 @@ title: Deploy
 description: Learn about deploy command
 ---
 
+# Deploying Applications
 
-### Overview
+The `andasy deploy` command builds and deploys your application to the Andasy platform. This command handles the entire deployment process, from building your container image to starting your application on Andasy machines.
 
-The `andasy deploy` command enables you to deploy applications to the Andasy platform using the Andasy CLI. It does so by building image using local or remote Docker and then push image to our registry.
-It supports both remote and local deployment modes, allowing flexibility depending on your workflow and environment.
+The deployment process involves:
 
-### Usage
+1. **Building your application** - Creating a container image from your code and Dockerfile
+2. **Pushing to registry** - Uploading the image to Andasy's private container registry
+3. **Deploying to machines** - Starting or updating your application on one or more machines
+
+The command supports both **remote** and **local** deployment modes, allowing flexibility depending on your workflow and environment.
+
+## How Deployment Works
+
+When you run `andasy deploy`, here's what happens behind the scenes:
+
+1. **Code Packaging** - Your application code is packaged along with the Dockerfile
+2. **Image Building** - A container image is built either:
+   - **Remote mode**: On Andasy's build servers (default)
+   - **Local mode**: On your machine using Docker
+3. **Image Storage** - The built image is pushed to Andasy's private container registry, where it's stored securely
+4. **Machine Deployment** - Andasy creates or updates machines running your application:
+   - Reads your `andasy.hcl` configuration
+   - Allocates resources (CPU, memory)
+   - Starts containers with your image
+   - Configures networking and routing
+5. **Health Checks** - Andasy verifies your application is running and accessible
+
+After deployment completes, your application is live and accessible via its assigned URL (typically `https://<app-name>.andasy.dev`).
+
+## Deployment Modes
+
+### Remote Mode (Default)
+
+In **remote mode**, Andasy builds your container image on its build servers. This is the default and recommended approach because:
+
+- No local Docker installation required
+- Consistent build environment
+- Faster for CI/CD pipelines
+- Builds happen in parallel with other tasks
+
+### Local Mode
+
+In **local mode**, you build the image on your machine using Docker, then upload it to Andasy. Use this mode when:
+
+- You want to test builds locally before deploying
+- You need to inspect the built image
+- You're working offline or have slow internet
+- You want more control over the build process
+
+## Usage
 
 ```
 andasy deploy <dir> [flags]
 ```
 
-`<dir>` is the path to your codes and it is optional in the case you are already in that path.
+`<dir>` is the path to your application code directory. This is optional if you're already in the project directory.
 
 #### Flags
 
 - `-a, --app string`  
-  Specifies the target Andasy application to deploy.
+  Specifies the target Andasy application to deploy. Required if `andasy.hcl` is not present in the current directory.
+
 - `-c, --config string`  
-  Path to the application configuration file.
+  Path to the application configuration file (default: `andasy.hcl` in the current directory). Use this if your config file is in a different location.
+
 - `-h, --help`  
   Displays help information for the deploy command.
+
 - `-i, --image-label string`  
-  Image label to deploy (useful for versioning or tagging).
+  Image label or tag to deploy. Useful for versioning (e.g., `v1.2.3`) or when deploying a pre-built image. If not specified, Andasy generates a label automatically.
+
 - `-m, --mode string`  
-  Sets the deployment mode: `remote` or `local` (default is `remote`).
+  Sets the deployment mode: `remote` (default) or `local`. See [Deployment Modes](#deployment-modes) above for details.
 
-### Examples
+## Examples
 
-**Deploy an application remotely:**
-```
+### Basic Remote Deployment
+
+Deploy from the current directory (uses `andasy.hcl` if present):
+
+```bash
 andasy deploy
 ```
 
-**Deploy with a custom directory and config path:**
-```
-andasy deploy ./my-app-location -a my-app-name -c ./andasy.hcl
+### Deploy with Explicit App Name
+
+When deploying from a different directory or without a config file:
+
+```bash
+andasy deploy -a my-app-name
 ```
 
-**Deploy using local Docker:**
+### Deploy with Custom Directory and Config
+
+Deploy from a specific directory with a custom config file location:
+
+```bash
+andasy deploy ./my-app-location -a my-app-name -c ./config/andasy.hcl
 ```
+
+### Deploy Using Local Docker
+
+Build the image locally, then deploy:
+
+```bash
 andasy deploy ./my-app -a my-app-name -m local
 ```
+
+This builds the image on your machine using Docker, then uploads it to Andasy.
+
+### Deploy a Specific Image Version
+
+Deploy a pre-built image with a specific label:
+
+```bash
+andasy deploy -a my-app-name -i v1.2.3
+```
+
+## What Happens After Deployment
+
+Once deployment completes successfully:
+
+- Your application is running on one or more machines
+- It's accessible via its URL (e.g., `https://my-app-name.andasy.dev`)
+- Logs are available via `andasy logs`
+- Metrics are collected automatically
+- You can SSH into machines using `andasy ssh`
+
+If deployment fails, check the error message for details. Common issues include:
+- Configuration errors in `andasy.hcl`
+- Build failures (check your Dockerfile)
+- Resource allocation issues
+- Port conflicts
+
+## Related Commands
+
+- [`andasy setup`](/docs/reference/setup) - Initial project setup
+- [`andasy apps restart`](/docs/reference/apps) - Restart a deployed application
+- [`andasy logs`](/docs/services/logs) - View application logs
+- [`andasy machines status`](/docs/reference/machines) - Check machine status

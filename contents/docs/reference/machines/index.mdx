@@ -3,7 +3,35 @@ title: Machines
 description: Learn how to create and manage machines in Andasy.
 ---
 
-Machines are the microVMs that run your applications on the Andasy platform. Your application code is packaged into a container image and deployed to a machine, where it is run in a secure and isolated environment. An application can have multiple machines associated with it, allowing you to scale your application horizontally.
+# Machines
+
+Machines are the virtual servers that run your applications on the Andasy platform. Each machine is a **microVM** (micro virtual machine). A lightweight, secure virtual machine optimized for running containerized applications.
+
+## What are Machines?
+
+A **machine** is an isolated virtual server instance that runs your application code. When you deploy an application, Andasy creates at least one machine to run it. Each machine:
+
+- Runs your containerized application in a secure, isolated environment
+- Has CPU and memory resources allocated (as specified in your `andasy.hcl`)
+- Can be started, stopped, restarted, or deleted independently
+
+## Machines vs Applications
+
+Understanding the relationship between machines and applications is important:
+
+- **Application** = The logical service (e.g., "my-api", "web-frontend") with its configuration
+- **Machine** = A physical instance running that application
+
+## MicroVM Technology
+
+Andasy uses **microVMs** (micro virtual machines) instead of traditional VMs or containers. MicroVMs provide:
+
+- **Better isolation** - Each machine is fully isolated from others, improving security
+- **Fast startup** - Machines start in milliseconds, enabling rapid scaling
+- **Resource efficiency** - Lower overhead than traditional VMs while maintaining security
+- **Container compatibility** - Your containerized applications run seamlessly
+
+You don't need to understand microVM internals to use Andasy. Just know that each machine provides a secure, isolated environment for your application.
 
 ## Listing machines
 
@@ -47,9 +75,11 @@ andasy machines delete <machine-id> -a <app-name>
 
 ## View status of a machine
 
-This command reports the live status of an application ([ENTRYPOINT](https://docs.docker.com/reference/dockerfile/#entrypoint) or [CMD](https://docs.docker.com/reference/dockerfile/#cmd)) running inside the machine.
-This is should not be regarded as server health checks; Application ([ENTRYPOINT](https://docs.docker.com/reference/dockerfile/#entrypoint) or [CMD](https://docs.docker.com/reference/dockerfile/#cmd)) may be running while the server is still starting up or failed to start;
-In this case this command will report running state.
+This command reports the live status of the application process running inside the machine. It checks whether your application's main process (defined by the Dockerfile's [ENTRYPOINT](https://docs.docker.com/reference/dockerfile/#entrypoint) or [CMD](https://docs.docker.com/reference/dockerfile/#cmd)) is currently running.
+
+<Note type="info" title="Process Status vs Health">
+This command reports whether the application process is running, not whether the application is healthy or ready to serve traffic. The process may be running while the application is still initializing, or it may be running but not responding correctly. For comprehensive health monitoring, use [`andasy metrics`](/docs/services/metrics) or check your application logs with [`andasy logs`](/docs/services/logs).
+</Note>
 
 ```bash
 andasy machines status <machine-id> -a <app-name>
@@ -57,8 +87,11 @@ andasy machines status <machine-id> -a <app-name>
 
 `<machine-id>` is optional. `-a <app-name>` is optional if `andasy.hcl` is present in current directory.
 
-## Alias
+When you deploy or update an application, Andasy manages machines automatically based on your configuration. You can also manually manage machines using the commands above.
 
+## Aliases
+
+The `machines` command can be invoked using any of the following aliases:
 - `machines`
 - `machine`
 
@@ -66,7 +99,14 @@ andasy machines status <machine-id> -a <app-name>
 
 | Flag | Description |
 |------|-------------|
-| `-a`, `--app` | The name of the app (**required**) |
+| `-a`, `--app` | The name of the app (**required** unless `andasy.hcl` is present) |
 | `-h`, `--help` | Show help for the command |
 | `-j`, `--json` | Output result in JSON format |
 | `-v`, `--verbose` | Verbose output |
+
+## Related Commands
+
+- [`andasy apps`](/docs/reference/apps) - Manage applications
+- [`andasy deploy`](/docs/reference/deploy) - Deploy applications (creates machines automatically)
+- [`andasy logs`](/docs/services/logs) - View logs from machines
+- [`andasy metrics`](/docs/services/metrics) - Monitor machine performance

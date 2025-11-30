@@ -3,29 +3,106 @@ title: Snapshots
 description: Learn how to create and manage snapshots of a volume in Andasy.
 ---
 
-The snapshot commands focus on managing snapshots of a volume. Snapshot is a copy of a volume at a certain point in time, usually taken daily and retained for a certain period of time.
+# Volume Snapshots
 
-## Listing volume snapshots
+A **snapshot** is a read-only copy of a volume's data at a specific point in time. Think of it as a photograph of your data that captures the exact state of your volume at the moment the snapshot was taken. Snapshots serve as backups, allowing you to restore your data to a previous state or recover from data loss.
 
-The following command lists volume's snapshots attached to a specific application. This also can retrieve the snapshots of a deleted volume in case its ID is known.
+Key characteristics of snapshots:
+
+- **Point-in-time backup** - Captures volume state at a specific moment
+- **Automatic creation** - Andasy automatically creates daily snapshots of your volumes
+- **Retention period** - Snapshots are retained for a limited time (check current retention policy)
+- **Restore capability** - You can restore volumes from snapshots if data is lost or corrupted
+- **Downloadable** - Snapshots can be downloaded for external backup or migration
+
+Snapshots are essential for data protection, especially for databases and applications storing critical data.
+
+## When to Use Snapshots
+
+Use snapshots for:
+
+- **Backup and recovery** - Protect against data loss from accidental deletion or corruption
+- **Point-in-time recovery** - Restore data to a specific moment before an issue occurred
+- **Migration** - Download snapshots to migrate data to another system
+- **Testing** - Create a copy of production data for testing without affecting production
+
+Snapshots are automatically created, but you can also download them manually for additional backup copies.
+
+## Listing Volume Snapshots
+
+List all snapshots for a volume:
 
 ```bash
 andasy volumes snapshots list <volumeId> -a <app-name>
 ```
 
-Replace `<app-name>` with the name of the application that owns the volume. Required if `andasy.hcl` is not present.
+Parameters:
+- `<app-name>` - The name of the application that owns the volume (required if `andasy.hcl` is not present)
+- `<volumeId>` - The ID of the volume (optional). If omitted, lists snapshots for all volumes in the application
 
-Replace `<volumeId>` with the ID of the volume (optional).
+This command shows:
+- Snapshot creation timestamps
+- Snapshot IDs (needed for downloading)
+- Volume information
 
-## Link to download snpashot
+### Viewing Snapshots of Deleted Volumes
 
-The following command makes downloadable link for a volume's snapshot. This Link is valid for 1
-day and should be kept confidential. This also can be used for recently deleted volume in case its ID is known.
+You can also retrieve snapshots of deleted volumes if you know the volume ID:
 
 ```bash
-andasy volumes snapshots link <volumeId> -a <app-name>
+andasy volumes snapshots list <deleted-volume-id> -a <app-name>
 ```
 
-Replace `<app-name>` with the name of the application that owns the volume. Required if `andasy.hcl` is not present.
+This is useful for recovering data from volumes that were accidentally deleted. Make sure to save volume IDs before deletion.
 
-Replace `<volumeId>` with the ID of the volume (optional).
+## Downloading Snapshots
+
+To download a snapshot, you first need to generate a download link:
+
+```bash
+andasy volumes snapshots link <snapshot-id> -a <app-name>
+```
+
+Parameters:
+- `<snapshot-id>` - The ID of the snapshot you want to download (get this from `snapshots list`)
+- `<app-name>` - The name of the application that owns the volume (required if `andasy.hcl` is not present)
+
+This command generates a secure download link that:
+- **Valid for 24 hours** - The link expires after one day for security
+- **Keep confidential** - Don't share the link publicly as it provides access to your data
+- **Direct download** - Use the link with `wget`, `curl`, or a browser to download the snapshot
+
+### Downloading Snapshots of Deleted Volumes
+
+You can also generate download links for snapshots of deleted volumes:
+
+```bash
+andasy volumes snapshots link <snapshot-id> -a <app-name>
+```
+
+Use the volume ID from before deletion. This allows you to recover data even after a volume has been deleted, as long as snapshots are still retained.
+
+### Example: Downloading a Snapshot
+
+```bash
+# 1. List snapshots to get the snapshot ID
+andasy volumes snapshots list -a my-app
+
+# 2. Generate download link
+andasy volumes snapshots link abc123-snapshot-id -a my-app
+
+# 3. Download using the provided link
+wget "https://download-link-from-command-output"
+```
+
+## Best Practices
+
+1. **Regular backups** - While Andasy creates automatic snapshots, consider downloading important snapshots for external backup
+2. **Save volume IDs** - Keep a record of volume IDs before deletion to access snapshots later
+3. **Test restores** - Periodically test restoring from snapshots to ensure your backup process works
+4. **Secure download links** - Keep download links confidential and download promptly (they expire in 24 hours)
+
+## Related Documentation
+
+- [Volumes](/docs/services/volumes) - Learn about persistent storage
+- [Apps](/docs/reference/apps) - Manage your applications

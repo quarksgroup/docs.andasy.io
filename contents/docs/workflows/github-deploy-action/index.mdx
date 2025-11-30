@@ -3,7 +3,18 @@ title: Github Deploy Action
 description: Learn how to deploy automatically with GitHub action
 ---
 
-[Andasy-action](https://github.com/quarksgroup/andasy-action) is a GitHub Action designed to deploy your GitHub repository to the [andasy.io](https://andasy.io/) platform. This action automates the deployment process using the `andasy-cli`.
+# GitHub Deploy Action
+
+[Andasy-action](https://github.com/quarksgroup/andasy-action) is a GitHub Action that automatically deploys your GitHub repository to the Andasy platform whenever you push code. This enables **continuous deployment** (CD), which automates the process of deploying your application whenever code changes are pushed to your repository.
+
+With the Andasy GitHub Action:
+
+- **Automatic deployments** - Every push to your main branch (or any branch you configure) triggers a deployment
+- **No manual steps** - No need to run `andasy deploy` manually
+- **Consistent process** - Every deployment follows the same automated process
+- **Faster releases** - Code changes go live automatically after tests pass
+
+This is especially useful for teams where multiple developers push code frequently, as it ensures the latest code is always deployed without manual intervention.
 
 ## Features
 
@@ -13,34 +24,55 @@ description: Learn how to deploy automatically with GitHub action
 
 ## Prerequisites
 
+Before setting up the GitHub Action, you need to:
+
+1. **Have an Andasy account** - Sign up at [andasy.io](https://andasy.io) if you haven't already
+2. **Set up your application** - Run `andasy setup` in your project to create the `andasy.hcl` configuration file
+3. **Get an access token** - Generate a token for the GitHub Action to authenticate
+
 ### Obtain Access Token
 
-1. Run the following command on your local machine with authenticated account on Andasy and obtain your token:
-   ```
+The GitHub Action needs an access token to authenticate with Andasy on your behalf. Generate one:
+
+1. Run the following command on your local machine (make sure you're authenticated):
+   ```bash
    andasy auth token
    ```
-2. Copy the generated token value.
+2. Copy the generated token value, you'll need it in the next step.
+
+<Note type="warning" title="Keep Tokens Secure">
+Access tokens provide full access to your Andasy account. Keep them confidential and never commit them to your repository. Store them only as GitHub secrets.
+</Note>
 
 ### Set Up Repository Secrets
 
-Add the copied token value to your GitHub repository secrets:
+Add the token as a GitHub secret so the action can use it securely:
 
-1. Navigate to your repository on GitHub.
-2. Go to `Settings` > `Secrets and variables` > `Actions`.
-3. Click `New repository secret`.
-4. Add a new secret with the name `ANDASY_ACCESS_TOKEN` and paste the token as it's value or (`Secret *` field).
+1. Navigate to your repository on GitHub
+2. Go to `Settings` > `Secrets and variables` > `Actions`
+3. Click `New repository secret`
+4. Add a new secret with:
+   - **Name**: `ANDASY_ACCESS_TOKEN`
+   - **Value**: Paste the token you copied from `andasy auth token`
+5. Click `Add secret`
+
+The token is now stored securely and accessible to your GitHub Actions workflows, but never exposed in logs or code.
 
 ## Usage
 
-To use the `andasy-action`, you'll need to create or update your workflow file (usually located at `.github/workflows/deploy.yml`).
+To use the `andasy-action`, create a GitHub Actions workflow file in your repository. Workflow files define when and how your actions run.
+
+### Creating a Workflow File
+
+1. Create the directory `.github/workflows/` in your repository root (if it doesn't exist)
+2. Create a file named `deploy.yml` (or any `.yml` file in `.github/workflows/`)
+3. Add the workflow configuration (see example below)
 
 ### Example Workflow
 
-Check [andasy-action-examples](https://github.com/quarksgroup/andasy-action-examples) on examples of how to use this action.
+Here's a basic example that deploys your application whenever code is pushed to the `main` branch:
 
-Here's an example of how to use `andasy-action` in a workflow file:
-
-```
+```yaml
 name: Deployment to Andasy
 on:
   push:
@@ -51,9 +83,64 @@ jobs:
     name: Deploy App
     runs-on: ubuntu-latest
     steps:
-        - uses: actions/checkout@v4
-        - uses: quarksgroup/andasy-action@main
-          env:
-          # Set access token
-            ANDASY_ACCESS_TOKEN: ${{ secrets.ANDASY_ACCESS_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: quarksgroup/andasy-action@main
+        env:
+          # Set access token from GitHub secrets
+          ANDASY_ACCESS_TOKEN: ${{ secrets.ANDASY_ACCESS_TOKEN }}
 ```
+
+**How this works:**
+1. **Trigger** - Runs on every push to the `main` branch
+2. **Checkout** - Downloads your repository code
+3. **Deploy** - Runs `andasy deploy` using the action, which builds and deploys your app
+
+### Customizing the Workflow
+
+You can customize when deployments run:
+
+```yaml
+# Deploy on push to main or when a release is created
+on:
+  push:
+    branches: [main]
+  release:
+    types: [created]
+
+# Or deploy only on manual trigger
+on:
+  workflow_dispatch:
+```
+
+For more examples and advanced configurations, check [andasy-action-examples](https://github.com/quarksgroup/andasy-action-examples).
+
+## How It Works
+
+When the workflow runs:
+
+1. **GitHub triggers the workflow** - Based on your `on:` configuration (push, release, etc.)
+2. **Code is checked out** - Your repository code is downloaded to the GitHub Actions runner
+3. **Andasy Action runs** - The action authenticates using your token and runs `andasy deploy`
+4. **Application deploys** - Your app is built and deployed to Andasy, just like running `andasy deploy` locally
+
+The deployment process is identical to running `andasy deploy` manually, the action just automates it.
+
+## Troubleshooting
+
+### Deployment Fails
+
+- **Check the token** - Verify `ANDASY_ACCESS_TOKEN` is set correctly in GitHub secrets
+- **Check `andasy.hcl`** - Ensure your configuration file exists and is valid
+- **View workflow logs** - Check the Actions tab in GitHub for detailed error messages
+- **Test locally** - Run `andasy deploy` locally to ensure it works
+
+### Token Issues
+
+- **Token expired** - Generate a new token with `andasy auth token`
+- **Wrong permissions** - Ensure the token has access to the organization and application
+
+## Related Documentation
+
+- [Deploy](/docs/reference/deploy) - Learn about the deployment process
+- [Authentication](/docs/reference/authentication) - Understand access tokens
+- [Setup](/docs/reference/setup) - Set up your application configuration

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: "Andasy Docs",
   metadataBase: new URL("https://docs.andasy.io/"),
   description:
-    "With Andasy, developers can effortlessly drop their code onto the platform and let the magic happen—Andasy handles the building, publishing, and deploying, bringing your application live for the world to see!",
+    "With Andasy, developers can effortlessly drop their code onto the platform and let the magic happen. Andasy handles the building, publishing, and deploying, bringing your application live for the world to see!",
 };
 
 export default function RootLayout({

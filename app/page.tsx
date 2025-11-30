@@ -20,7 +20,7 @@ export default function Home() {
         Effortlessly deploy your applications
       </h1>
       <p className="mb-8 sm:text-lg max-w-[800px] text-muted-foreground">
-        With Andasy, developers can effortlessly drop their code onto the platform and let the magic happen—Andasy handles the building, publishing, and deploying, bringing your application live for the world to see!
+        With Andasy, developers can effortlessly drop their code onto the platform and let the magic happen. Andasy handles the building, publishing, and deploying, bringing your application live for the world to see!
       </p>
       <div className="flex flex-row items-center gap-5">
         <Link

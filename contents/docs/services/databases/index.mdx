@@ -3,14 +3,28 @@ title: Database
 description: Learn how to create and manage database in Andasy.
 ---
 
-The `database` command is used for managing database services within Andasy. It allows you to provision and control supported databases as part of your application infrastructure.
+# Database Services
+
+The `database` command allows you to provision database services within Andasy. Database services are database instances that run as separate applications on the platform. When you create a database service, Andasy provides:
+
+- **Automatic setup** - Database software is installed and initially configured automatically
+- **Persistent storage** - Data is stored on volumes that survive restarts
+- **Private network access** - Databases are accessible only within your Andasy organization's private network
+- **Connection credentials** - Initial credentials are automatically generated
+
+<Note type="info" title="You Manage the Database">
+Andasy handles the **initial setup and installation** of the database software, but **you are responsible for managing the database itself**. This includes backups, configuration, updates, user management, and all database operations. You manage PostgreSQL through SSH access or standard database tools.
+</Note>
+
+## Supported Database Engines
 
 Currently, the following database engines are supported:
 
-- [PostgreSQL](/docs/services/databases/postgres) — Manage PostgreSQL as a service in your apps
+- **[PostgreSQL](/docs/services/databases/postgres)** — Fully-managed PostgreSQL database service
 
-
-> More database engines will be supported in future versions of Andasy.
+<Note type="info" title="More Databases Coming">
+Additional database engines (MySQL, Redis, MongoDB, etc.) will be supported in future versions of Andasy.
+</Note>
 
 ## Usage
 

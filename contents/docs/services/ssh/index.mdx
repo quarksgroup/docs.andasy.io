@@ -3,27 +3,103 @@ title: SSH Sessions
 description: Learn how to initiate SSH Sessions to your Andasy machines.
 ---
 
-You can initiate an SSH session to a machine running your application on the Andasy platform using the Andasy CLI. This allows you to access the machine's shell and interact with your application directly.
+# SSH Access
+
+You can initiate an SSH (Secure Shell) session to a machine running your application on the Andasy platform using the Andasy CLI. This allows you to access the machine's shell and interact with your application directly, similar to logging into a remote server.
+
+## What is SSH?
+
+**SSH (Secure Shell)** is a protocol that provides secure remote access to a machine's command-line interface. With SSH access to your Andasy machines, you can:
+
+- **Debug issues** - Inspect running processes, check logs, examine files
+- **Run commands** - Execute diagnostic commands or one-off tasks
+- **Inspect the environment** - Check environment variables, network configuration, resource usage
+- **Database access** - Connect to databases using command-line tools (e.g., `psql` for PostgreSQL)
+- **File system access** - Browse directories, check file permissions, examine application files
+
+SSH access is particularly useful for troubleshooting, debugging, and performing administrative tasks that aren't easily done through the CLI or dashboard.
 
 ## Initiating an SSH Session
 
-To initiate an SSH session to a machine running your application, run the following command in your terminal:
+To initiate an SSH session to a machine running your application, run:
 
 ```bash
 andasy ssh -a <app-name>
 ```
 
-Replace `<app-name>` with the name of the application that you want to initiate an SSH session to. If you currently are in the root directory of the application, you can omit the `-a` flag as long as a `andasy.hcl` file exists in the root directory.
+Replace `<app-name>` with the name of your application. If you're currently in the root directory of the application, you can omit the `-a` flag as long as a `andasy.hcl` file exists in the root directory.
 
-This command will establish an SSH connection to the machine running your application and open a shell session. You can interact with your application and run commands as if you were logged in to the machine directly.
+This command establishes an SSH connection to one of the machines running your application and opens an interactive shell session. You can then run commands as if you were logged into the machine directly.
 
-## Avaliable Flags
+### Running a Single Command
+
+Instead of opening an interactive session, you can execute a single command and exit:
+
+```bash
+andasy ssh -a <app-name> -c "ps aux | grep node"
+```
+
+This is useful for quick checks or when scripting automated tasks.
+
+## Available Flags
 
 | Flag | Description |
 |------|-------------|
-| `-a`, `--app` | The name of the app (**required**) |
-| `-c`, `--command` | The command to run in the ssh session |
+| `-a`, `--app` | The name of the app (**required** unless `andasy.hcl` is present) |
+| `-c`, `--command` | Execute a single command instead of opening an interactive session. The command runs and the session exits immediately |
 | `-h`, `--help` | Show help for the command |
-| `--pty` | Allocate a pseudo-terminal for the ssh session (default `true`) |
-| `-j`, `--json` | Output result in JSON format |
-| `-v`, `--verbose` | Verbose output |
+| `--pty` | Allocate a pseudo-terminal for the SSH session (default: `true`). A PTY is needed for interactive programs like text editors or interactive shells |
+| `-j`, `--json` | Output result in JSON format (useful when using `-c` flag) |
+| `-v`, `--verbose` | Enable verbose output for debugging connection issues |
+
+## Common Use Cases
+
+### Inspecting Running Processes
+
+```bash
+andasy ssh -a my-app -c "ps aux"
+```
+
+### Checking Disk Usage
+
+```bash
+andasy ssh -a my-app -c "df -h"
+```
+
+### Viewing Environment Variables
+
+```bash
+andasy ssh -a my-app -c "env | grep DB"
+```
+
+### Accessing Database (PostgreSQL)
+
+```bash
+# SSH into the database service
+andasy ssh -a my-db-app
+
+# Then run psql
+psql -U postgres -d postgres
+```
+
+### Checking Application Logs
+
+```bash
+# View logs directly on the machine
+andasy ssh -a my-app -c "tail -f /var/log/app.log"
+```
+
+Note: For most log viewing, [`andasy logs`](/docs/services/logs) is more convenient than SSH.
+
+## Security Considerations
+
+- SSH access is secured through Andasy's private network
+- Only authenticated users with access to the application can SSH into machines
+- SSH sessions are logged for security auditing
+- Changes made via SSH are ephemeral if not persisted to volumes or configuration
+
+## Related Commands
+
+- [`andasy logs`](/docs/services/logs) - View application logs (often easier than SSH)
+- [`andasy proxy`](/docs/services/proxy) - Forward ports for local database access
+- [`andasy apps`](/docs/reference/apps) - Manage your applications

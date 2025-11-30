@@ -4,11 +4,40 @@ title: Setup
 
 # `andasy setup`
 
-The `andasy setup` command streamlines the initial configuration of your application for deployment. It automatically detects the programming language of your project, generates a suitable `Dockerfile`, and creates a configuration file in `.hcl` format. These files are essential for deploying your application with Andasy, ensuring consistent environments and simplified deployment workflows.
+The `andasy setup` command streamlines the initial configuration of your application for deployment. When you run `andasy setup`, the CLI performs three key tasks:
 
-## Description
+1. **Detects your application stack** - Analyzes your project directory to identify the programming language, framework, and dependencies
+2. **Generates a Dockerfile** - Creates a `Dockerfile` that defines how to build and run your application as a container
+3. **Creates a configuration file** - Produces a `andasy.hcl` file that specifies deployment settings like resources, ports, and environment variables
 
-When you run `andasy setup`, the CLI analyzes your application's working directory to determine the language and framework in use. Based on this detection, it generates a tailored `Dockerfile` that encapsulates the necessary build and runtime instructions. Additionally, it produces a `.hcl` configuration file containing metadata and settings required for deployment.
+These files are essential for deploying your application with Andasy, ensuring consistent environments and simplified deployment workflows.
+
+## Understanding the Generated Files
+
+### Dockerfile
+
+A **Dockerfile** is a text file that contains instructions for building a container image of your application. Containers package your application code along with its dependencies and runtime environment, ensuring it runs consistently across different machines. The generated Dockerfile tells Andasy:
+
+- What base image to use (e.g., Node.js, Python, Go)
+- How to install dependencies
+- How to build your application
+- What command to run when the container starts
+
+If you already have a Dockerfile in your project, `andasy setup` will detect and use it instead of generating a new one.
+
+### Configuration File (andasy.hcl)
+
+The `andasy.hcl` file uses **HCL (HashiCorp Configuration Language)**, a human-readable configuration format. This file defines:
+
+- Your application name
+- Resource allocation (CPU, memory)
+- Network settings (ports)
+- Environment variables
+- Storage requirements (if needed)
+
+This configuration file is what Andasy reads to understand how you want your application deployed. You can edit it manually to adjust settings without regenerating it.
+
+## Customizing Setup
 
 You can customize the setup process using various flags, such as specifying the application name, organization, or output format. The command is designed to be flexible, supporting both interactive and automated workflows.
 
