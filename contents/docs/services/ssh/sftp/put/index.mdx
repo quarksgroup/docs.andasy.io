@@ -1,0 +1,335 @@
+---
+title: SFTP put
+description: "Upload files and directories to remote Andasy application VMs using SFTP"
+---
+
+# andasy ssh sftp put
+
+The `andasy ssh sftp put` command uploads files and directories from your local machine to a remote VM using the secure SFTP protocol.
+
+## Overview
+
+This command enables you to:
+- Upload individual files to your remote application
+- Deploy entire directories recursively
+- Update configuration files
+- Deploy scripts and executables
+- Transfer static assets and media files
+- Set file permissions during upload
+
+## Syntax
+
+```bash
+andasy ssh sftp put <local-path> [remote-path] [flags]
+```
+
+## Arguments
+
+### `<local-path>`
+
+The path to the local file or directory that you want to upload.
+
+**Type:** String  
+**Required:** Yes
+
+```bash
+andasy ssh sftp put ./config.yaml -a my-app
+```
+
+### `[remote-path]`
+
+The destination path on the remote VM where the file will be saved. If omitted, the file is uploaded to the home directory or default working directory with the same filename.
+
+**Type:** String  
+**Required:** No  
+**Default:** Home/working directory with original filename
+
+```bash
+# Upload to specific remote path
+andasy ssh sftp put ./config.yaml /app/config/production.yaml -a my-app
+
+# Upload to default location
+andasy ssh sftp put ./config.yaml -a my-app
+```
+
+## Required Flags
+
+### `-a, --app <app-name>`
+
+Specifies the target Andasy application to upload to.
+
+**Type:** String  
+**Required:** Yes (unless `andasy.hcl` is in the current working directory)
+
+```bash
+andasy ssh sftp put ./deploy.sh /app/scripts/deploy.sh -a my-production-app
+```
+
+## Optional Flags
+
+### `-R, --recursive`
+
+Upload directories recursively, including all subdirectories and files.
+
+**Type:** Boolean  
+**Required:** No  
+**Default:** false
+
+```bash
+andasy ssh sftp put ./config -R /app/config -a my-app
+```
+
+### `-m, --mode <permissions>`
+
+Set file mode/permissions for the uploaded file in octal notation (e.g., 0644, 0755).
+
+**Type:** String  
+**Required:** No  
+**Default:** `0644`
+
+**Common permission modes:**
+- `0644`: Read/write for owner, read-only for group and others (default for files)
+- `0755`: Read/write/execute for owner, read/execute for group and others (for scripts)
+- `0600`: Read/write for owner only (for sensitive files)
+- `0400`: Read-only for owner (for protected config files)
+
+```bash
+# Upload executable script with execute permissions
+andasy ssh sftp put ./deploy.sh /app/scripts/deploy.sh -m 0755 -a my-app
+
+# Upload sensitive config with restricted permissions
+andasy ssh sftp put ./secrets.yaml /app/config/secrets.yaml -m 0600 -a my-app
+```
+
+### `-h, --help`
+
+Display help information for the put command.
+
+```bash
+andasy ssh sftp put --help
+```
+
+## Usage Examples
+
+### Example 1: Upload Single File
+
+Upload a configuration file to the remote VM:
+
+```bash
+andasy ssh sftp put ./config.yaml /app/config.yaml -a my-app
+```
+
+### Example 2: Upload with Custom Permissions
+
+Upload an executable script with execute permissions:
+
+```bash
+andasy ssh sftp put ./deploy.sh /app/scripts/deploy.sh -m 0755 -a my-app
+```
+
+### Example 3: Upload Directory Recursively
+
+Upload an entire directory with all its contents:
+
+```bash
+andasy ssh sftp put ./config -R /app/config -a my-app
+```
+
+### Example 4: Upload Sensitive File
+
+Upload a file with restricted permissions:
+
+```bash
+andasy ssh sftp put ./database.env /app/.env -m 0600 -a my-app
+```
+
+### Example 5: Upload to Default Location
+
+Upload file to default working directory:
+
+```bash
+andasy ssh sftp put ./data.json -a my-app
+```
+
+## Upload Behavior
+
+### Single File Upload
+
+When uploading a single file:
+- If `remote-path` is a directory, the file is saved inside that directory with its original name
+- If `remote-path` is a file path, the file is saved with the specified name
+- If `remote-path` is omitted, the file is uploaded to the default working directory
+- File permissions are set according to the `-m` flag or default to 0644
+
+### Recursive Directory Upload
+
+When using the `-R` flag:
+- The entire directory structure is recreated on the remote VM
+- All subdirectories and files are uploaded
+- File permissions can be set with the `-m` flag (applies to all files)
+- Existing files are overwritten
+
+## File Permission Guide
+
+### Understanding Octal Permissions
+
+File permissions in Unix/Linux are represented by three digits:
+- **First digit**: Owner permissions
+- **Second digit**: Group permissions
+- **Third digit**: Others permissions
+
+Each digit is the sum of:
+- **4**: Read permission
+- **2**: Write permission
+- **1**: Execute permission
+
+### Common Permission Patterns
+
+| Mode | Octal | Description | Use Case |
+|------|-------|-------------|----------|
+| `rw-r--r--` | 0644 | Owner read/write, others read | Regular files, configs |
+| `rwxr-xr-x` | 0755 | Owner all, others read/execute | Scripts, executables |
+| `rw-------` | 0600 | Owner read/write only | Secrets, private keys |
+| `r--------` | 0400 | Owner read-only | Protected configs |
+| `rwxrwxrwx` | 0777 | All permissions for everyone | ⚠️ Avoid (security risk) |
+
+### Best Practices for Permissions
+
+1. **Configuration Files**: Use `0644` for general configs, `0600` for sensitive configs
+2. **Scripts**: Use `0755` for executable scripts
+3. **Private Keys**: Use `0400` or `0600` for SSH keys and certificates
+4. **Public Files**: Use `0644` for publicly readable files
+5. **Directories**: Typically use `0755` to allow traversal
+
+## Performance Considerations
+
+1. **Large File Uploads**: For very large files, use verbose mode to monitor progress.
+
+2. **Network Bandwidth**: SFTP uploads consume network bandwidth; schedule large uploads during off-peak hours if necessary.
+
+3. **Recursive Uploads**: Be cautious when recursively uploading large directories; verify the size first:
+   ```bash
+   du -sh ./large-directory
+   ```
+
+4. **Compression**: SFTP automatically compresses data during transfer for better performance.
+
+## Best Practices
+
+1. **Verify Remote Path**: Use `andasy ssh sftp find` to verify the destination directory exists before uploading.
+
+2. **Set Appropriate Permissions**: Always specify permissions with `-m` for scripts, executables, and sensitive files.
+
+3. **Backup Before Overwriting**: Before uploading files that will overwrite existing ones, consider backing them up first:
+   ```bash
+   andasy ssh sftp get /app/config.yaml ./backup/config.yaml.bak -a my-app
+   andasy ssh sftp put ./new-config.yaml /app/config.yaml -a my-app
+   ```
+
+4. **Test in Non-Production First**: Always test file uploads in development or staging environments before production.
+
+5. **Leverage Verbose Mode**: Use `--verbose` for large uploads to monitor progress and diagnose issues.
+
+6. **Validate After Upload**: After uploading, verify the file was transferred correctly:
+   ```bash
+   andasy ssh shell -a my-app -c "ls -la /app/config.yaml"
+   andasy ssh shell -a my-app -c "cat /app/config.yaml"
+   ```
+
+## Troubleshooting
+
+### Permission Denied
+
+If you can't write to the remote path:
+
+```bash
+# Check remote directory permissions
+andasy ssh shell -a my-app -c "ls -la /app"
+
+# Verify you have write access
+andasy ssh shell -a my-app -c "touch /app/test.txt && rm /app/test.txt"
+```
+
+### Directory Not Found
+
+If the remote directory doesn't exist:
+
+```bash
+# Create the directory first
+andasy ssh shell -a my-app -c "mkdir -p /app/new-directory"
+
+# Then upload
+andasy ssh sftp put ./file.txt /app/new-directory/file.txt -a my-app
+```
+
+### Upload Interrupted
+
+If an upload fails midway:
+
+```bash
+# Retry
+andasy ssh sftp put ./large-file.zip /app/uploads/ -a my-app
+
+# Check if VM is running
+andasy machine status -a my-app
+```
+
+### File Already Exists
+
+SFTP will overwrite existing files by default. To prevent accidental overwrites:
+
+```bash
+# Check if file exists first
+andasy ssh sftp find /app/config -a my-app
+
+# Backup existing file
+andasy ssh shell -a my-app -c "cp /app/config.yaml /app/config.yaml.bak"
+
+# Then upload
+andasy ssh sftp put ./config.yaml /app/config.yaml -a my-app
+```
+
+### Recursive Upload Fails
+
+If recursive upload encounters errors:
+
+```bash
+# Try uploading subdirectories individually
+andasy ssh sftp put ./config/sub1 -R /app/config/sub1 -a my-app
+andasy ssh sftp put ./config/sub2 -R /app/config/sub2 -a my-app
+
+# Use verbose mode to identify the problematic file
+andasy ssh sftp put ./config -R /app/config -a my-app --verbose
+```
+
+### Permission Mode Not Applied
+
+If permissions aren't set correctly:
+
+```bash
+# Verify permissions after upload
+andasy ssh shell -a my-app -c "ls -la /app/script.sh"
+
+# Manually set permissions if needed
+andasy ssh shell -a my-app -c "chmod 0755 /app/script.sh"
+```
+
+## Security Considerations
+
+- Always use restrictive permissions (0600 or 0400) for sensitive files like private keys and secrets
+- Avoid using 0777 permissions as they grant full access to everyone
+- Uploaded files should be validated and scanned for security issues
+- Use encrypted storage for sensitive files before uploading
+- Regularly audit uploaded files and remove unnecessary ones
+- Consider using environment variables instead of uploading sensitive configuration files
+
+## Related Commands
+
+- [sftp](/docs/services/ssh/sftp)
+- [sftp find](/docs/services/ssh/sftp/find)
+- [sftp get](/docs/services/ssh/sftp/get)
+- [sftp shell](/docs/services/ssh/sftp/shell)
+
+---
+
+**Tip:** Always set appropriate file permissions with the `-m` flag when uploading scripts or sensitive files. Use `0755` for executables and `0600` for secrets.

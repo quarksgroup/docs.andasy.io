@@ -1,0 +1,232 @@
+---
+title: SFTP get
+description: "Download files and directories from remote Andasy application VMs using SFTP"
+---
+
+# andasy ssh sftp get
+
+The `andasy ssh sftp get` command retrieves files and directories from a remote VM to your local machine using the secure SFTP protocol.
+
+## Overview
+
+This command enables you to:
+- Download individual files from your remote application
+- Retrieve entire directories recursively
+- Backup configuration files and data
+- Download logs for local analysis
+- Fetch generated reports or exports
+
+## Syntax
+
+```bash
+andasy ssh sftp get <remote-path> [local-path] [flags]
+```
+
+## Arguments
+
+### `<remote-path>`
+
+The path to the file or directory on the remote VM that you want to download.
+
+**Type:** String  
+**Required:** Yes
+
+```bash
+andasy ssh sftp get /app/config.yaml -a my-app
+```
+
+### `[local-path]`
+
+The destination path on your local machine where the file will be saved. If omitted, the file is saved to the current directory with the same filename.
+
+**Type:** String  
+**Required:** No  
+**Default:** Current directory with original filename
+
+```bash
+# Download to specific local path
+andasy ssh sftp get /app/config.yaml ./backup/config.yaml -a my-app
+
+# Download to current directory
+andasy ssh sftp get /app/config.yaml -a my-app
+```
+
+## Required Flags
+
+### `-a, --app <app-name>`
+
+Specifies the target Andasy application to download from.
+
+**Type:** String  
+**Required:** Yes (unless `andasy.hcl` is in the current working directory)
+
+```bash
+andasy ssh sftp get /app/data.json -a my-production-app
+```
+
+## Optional Flags
+
+### `-R, --recursive`
+
+Download directories recursively, including all subdirectories and files.
+
+**Type:** Boolean  
+**Required:** No  
+**Default:** false
+
+```bash
+andasy ssh sftp get /app/config -R -a my-app
+```
+
+### `-h, --help`
+
+Display help information for the get command.
+
+```bash
+andasy ssh sftp get --help
+```
+
+## Usage Examples
+
+### Example 1: Download Single File
+
+Download a configuration file to the current directory:
+
+```bash
+andasy ssh sftp get /app/config.yaml -a my-app
+```
+
+### Example 2: Download to Specific Location
+
+Download a file to a specific local path:
+
+```bash
+andasy ssh sftp get /app/config.yaml ./backup/prod-config.yaml -a my-app
+```
+
+### Example 3: Download Directory Recursively
+
+Download an entire directory with all its contents:
+
+```bash
+andasy ssh sftp get -R -a my-app /app
+```
+
+
+## Download Behavior
+
+### Single File Download
+
+When downloading a single file:
+- If `local-path` is a directory, the file is saved inside that directory with its original name
+- If `local-path` is a file path, the file is saved with the specified name
+- If `local-path` is omitted, the file is saved to the current directory
+
+### Recursive Directory Download
+
+When using the `-R` flag:
+- The entire directory structure is preserved locally
+- All subdirectories and files are downloaded
+- File permissions are maintained where possible
+- Symbolic links are followed
+
+## Performance Considerations
+
+1. **Large File Transfers**: For very large files, consider using verbose mode to monitor progress.
+
+2. **Network Bandwidth**: SFTP transfers consume network bandwidth; schedule large downloads during off-peak hours if necessary.
+
+3. **Recursive Downloads**: Be cautious when recursively downloading large directories; verify the size first:
+   ```bash
+   andasy ssh shell -a my-app -c "du -sh /app/large-directory"
+   ```
+
+4. **Compression**: SFTP automatically compresses data during transfer for better performance.
+
+## Best Practices
+
+1. **Verify Before Download**: Use `andasy ssh sftp find` to verify the file exists before attempting to download.
+
+2. **Use Descriptive Local Paths**: When downloading files, use descriptive local paths that include dates or version information.
+
+3. **Backup Regularly**: Set up automated scripts to regularly download critical configuration and data files.
+
+4. **Check Disk Space**: Ensure you have sufficient local disk space before downloading large files or directories.
+
+## Troubleshooting
+
+### File Not Found
+
+If the remote file doesn't exist:
+
+```bash
+# Verify the file exists
+andasy ssh sftp find /app/config -a my-app
+
+# Check the exact path
+andasy ssh shell -a my-app -c "ls -la /app/config.yaml"
+```
+
+### Permission Denied
+
+If you lack permissions to read the file:
+
+```bash
+# Check file permissions
+andasy ssh shell -a my-app -c "ls -la /app/restricted-file.txt"
+
+# Contact administrator for access
+```
+
+### Download Interrupted
+
+If a download fails midway:
+
+```bash
+# Retry with verbose mode
+andasy ssh sftp get /app/large-file.zip -a my-app --verbose
+
+# Check if VM is running
+andasy machine status -a my-app
+```
+
+### Local Path Issues
+
+If you can't write to the local path:
+
+```bash
+# Check local directory permissions
+ls -la ./backup/
+
+# Create directory if it doesn't exist
+mkdir -p ./backup/
+```
+
+### Recursive Download Fails
+
+If recursive download encounters errors:
+
+```bash
+# Try downloading subdirectories individually
+andasy ssh sftp get /app/config/sub1 -R -a my-app
+andasy ssh sftp get /app/config/sub2 -R -a my-app
+```
+
+## Security Considerations
+
+- Downloaded files retain their original permissions where possible
+- Sensitive files should be stored securely on your local machine
+- Use encrypted storage for downloaded configuration files containing secrets
+- Regularly audit downloaded files and remove unnecessary copies
+- Ensure proper access controls on local backup directories
+
+## Related Commands
+
+- [sftp](/docs/services/ssh/sftp)
+- [sftp find](/docs/services/ssh/sftp/find)
+- [sftp put](/docs/services/ssh/sftp/put)
+- [sftp shell](/docs/services/ssh/sftp/shell)
+
+---
+
+**Tip:** Always verify the remote file path with `andasy ssh sftp find` before attempting to download, especially when working with unfamiliar directory structures.

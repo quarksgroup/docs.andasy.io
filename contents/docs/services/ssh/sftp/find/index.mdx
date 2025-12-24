@@ -1,0 +1,212 @@
+---
+title: SFTP find
+description: "List and browse files on remote Andasy application VMs using SFTP"
+---
+
+# andasy ssh sftp find
+
+The `andasy ssh sftp find` command lists files and directories on a remote VM, allowing you to browse the file system structure of your Andasy applications.
+
+## Overview
+
+This command enables you to:
+- List files in a specific directory on your remote VM
+- Browse the entire file system structure
+- Verify file locations before performing get or put operations
+- Explore application directory layouts
+
+## Syntax
+
+```bash
+andasy ssh sftp find [path] [flags]
+```
+
+## Aliases
+
+You can use shorter versions of this command:
+- `find`
+- `ls`
+- `list`
+
+Example using aliases:
+```bash
+andasy ssh sftp ls /app -a my-app
+andasy ssh sftp list /var/log -a my-app
+```
+
+## Arguments
+
+### `[path]`
+
+Optional path to the directory you want to list. If omitted, lists files from the root directory or current working directory.
+
+**Type:** String  
+**Required:** No  
+**Default:** `/` (root directory)
+
+```bash
+# List files in /app directory
+andasy ssh sftp find /app -a my-app
+
+# List files in root directory
+andasy ssh sftp find -a my-app
+```
+
+## Required Flags
+
+### `-a, --app <app-name>`
+
+Specifies the target Andasy application to connect to.
+
+**Type:** String  
+**Required:** Yes (unless `andasy.hcl` is in the current working directory)
+
+```bash
+andasy ssh sftp find /app -a my-production-app
+```
+
+## Optional Flags
+
+### `-h, --help`
+
+Display help information for the find command.
+
+```bash
+andasy ssh sftp find --help
+```
+
+## Usage Examples
+
+### Example 1: List Application Root Directory
+
+List all files in the application's root directory:
+
+```bash
+andasy ssh sftp find /app -a my-app
+```
+
+### Example 2: List Root Directory
+
+List files from the root directory (no path specified):
+
+```bash
+andasy ssh sftp find -a my-app
+```
+
+### Example 3: Explore Database Directory
+
+Browse database-related files:
+
+```bash
+andasy ssh sftp list /var/lib/postgresql -a db-app
+```
+
+## Common Use Cases
+
+### Pre-Download Verification
+
+Before downloading files, verify they exist:
+
+```bash
+# Check if config file exists
+andasy ssh sftp find /app/config -a my-app
+
+# Then download
+andasy ssh sftp get /app/config/settings.yaml -a my-app
+```
+
+### Directory Structure Exploration
+
+Understand your application's file organization:
+
+```bash
+# List top-level directories
+andasy ssh sftp find / -a my-app
+
+# Explore subdirectories
+andasy ssh sftp find /app -a my-app
+andasy ssh sftp find /app/src -a my-app
+```
+
+### Log File Discovery
+
+Find log files for analysis:
+
+```bash
+# List all log directories
+andasy ssh sftp find /var/log -a my-app
+
+# Check application-specific logs
+andasy ssh sftp find /app/logs -a my-app
+```
+
+### Asset Management
+
+Browse uploaded or static assets:
+
+```bash
+# Check user uploads
+andasy ssh sftp find /app/uploads -a my-app
+
+# List static files
+andasy ssh sftp find /app/public -a my-app
+```
+
+## Best Practices
+
+1. **Start with Root Exploration**: Begin by listing the root directory to understand the overall structure before diving into subdirectories.
+
+2. **Verify Before Transfer**: Always use `find` to verify file paths before attempting get or put operations.
+
+3. **Check Permissions**: Pay attention to file permissions in the output to understand access rights before attempting operations.
+
+4. **Use Aliases for Efficiency**: Use shorter aliases like `ls` or `list` for quick interactive commands.
+
+## Troubleshooting
+
+### Permission Denied
+
+If you can't list a directory:
+
+```bash
+# Try listing parent directory first
+andasy ssh sftp find /app -a my-app
+
+# Check with SSH shell
+andasy ssh shell -a my-app -c "ls -la /restricted-dir"
+```
+
+### Directory Not Found
+
+Verify the path exists:
+
+```bash
+# List parent directory
+andasy ssh sftp find /app -a my-app
+
+# Use verbose mode for details
+andasy ssh sftp find /app/missing -a my-app --verbose
+```
+
+### Empty Output
+
+If the directory appears empty but shouldn't be:
+
+```bash
+# Check with verbose mode
+andasy ssh sftp find /app -a my-app --verbose
+
+# Verify with SSH shell
+andasy ssh shell -a my-app -c "ls -la /app"
+```
+
+## Related Commands
+
+- [sftp](/docs/services/ssh/sftp)
+- [sftp get](/docs/services/ssh/sftp/get)
+- [sftp put](/docs/services/ssh/sftp/put)
+- [sftp shell](/docs/services/ssh/sftp/shell)
+
+---
+
+**Tip:** Use `andasy ssh sftp find` before performing file transfers to ensure you're targeting the correct paths and that files exist.
