@@ -1,0 +1,383 @@
+---
+title: WireGuard remove
+description: "Remove WireGuard VPN peers from your organization network"
+---
+
+# andasy wireguard remove
+
+The `andasy wireguard remove` command removes a peer from your organization's VPN, immediately revoking its access to the secure network.
+
+## Overview
+
+This command enables you to:
+- Revoke VPN access for devices or users
+- Remove compromised or lost devices from the network
+- Offboard team members from the VPN
+- Clean up unused or inactive peers
+- Maintain security by removing unnecessary access
+
+## Syntax
+
+```bash
+andasy wireguard remove [flags]
+```
+
+## Aliases
+
+You can use the shorter alias:
+- `rm`
+
+Example using alias:
+```bash
+andasy wg rm -o my-org -p <public-key>
+```
+
+## Optional Flags
+
+### `-o, --org <organization-slug>`
+
+Specifies the target Andasy organization.
+
+**Type:** String  
+**Required:** No (may be prompted if omitted)
+
+```bash
+andasy wireguard remove -o my-production-org -p <public-key>
+```
+
+### `-p, --peer <public-key>`
+
+The public key of the peer to remove. If omitted, you may be prompted to select from your peers.
+
+**Type:** String  
+**Required:** No (may be prompted if omitted)
+
+```bash
+andasy wireguard remove -o my-org -p "ABC123...XYZ789="
+```
+
+### `-h, --help`
+
+Display help information for the remove command.
+
+```bash
+andasy wireguard remove --help
+```
+
+
+## Usage Examples
+
+### Example 1: Remove Specific Peer
+
+Remove a peer by its public key:
+
+```bash
+andasy wireguard remove -o my-org -p "ABC123...XYZ789="
+```
+
+### Example 2: Interactive Removal
+
+Remove a peer with interactive selection:
+
+```bash
+andasy wireguard remove -o my-org
+# You'll be prompted to select which peer to remove
+```
+
+### Example 3: Using Alias
+
+Use the shorter command alias:
+
+```bash
+andasy wg rm -o my-org -p "ABC123...XYZ="
+```
+
+### Example 4: Remove After Listing
+
+List peers first, then remove:
+
+```bash
+# List peers to find the one to remove
+andasy wireguard list -o my-org
+
+# Remove the identified peer
+andasy wireguard remove -o my-org -p "ABC123...XYZ="
+```
+
+### Example 5: Remove Lost Device
+
+Remove a lost or stolen device:
+
+```bash
+# Immediately remove compromised device
+andasy wireguard remove -o my-org -p "LOST_DEVICE_KEY="
+```
+
+### Example 6: Offboard User
+
+Remove all peers belonging to a departing user:
+
+```bash
+# Find user's peers
+andasy wireguard list -o my-org -a
+
+# Remove each peer
+andasy wireguard remove -o my-org -p "USER_PEER_1="
+andasy wireguard remove -o my-org -p "USER_PEER_2="
+```
+
+### Example 7: Remove with Confirmation
+
+Remove peer with explicit confirmation:
+
+```bash
+PEER_KEY="ABC123...XYZ="
+echo "Are you sure you want to remove peer $PEER_KEY? (yes/no)"
+read confirmation
+if [ "$confirmation" = "yes" ]; then
+  andasy wireguard remove -o my-org -p "$PEER_KEY"
+fi
+```
+
+## Common Use Cases
+
+### Security Incident Response
+
+Immediately remove compromised devices:
+
+```bash
+#!/bin/bash
+# emergency-revoke.sh
+
+ORG="my-org"
+COMPROMISED_KEY="$1"
+
+if [ -z "$COMPROMISED_KEY" ]; then
+    echo "Usage: $0 <compromised-peer-key>"
+    exit 1
+fi
+
+echo "EMERGENCY: Revoking access for compromised peer"
+andasy wireguard remove -o "$ORG" -p "$COMPROMISED_KEY"
+
+echo "Access revoked. Peer can no longer connect to VPN."
+echo "Next steps:"
+echo "1. Investigate the security incident"
+echo "2. Review VPN logs for unauthorized access"
+echo "3. Consider rotating other credentials"
+```
+
+### Device Replacement
+
+Remove old device when replacing with new one:
+
+```bash
+#!/bin/bash
+# replace-device.sh
+
+ORG="my-org"
+OLD_PEER_KEY="$1"
+NEW_DEVICE_NAME="$2"
+
+if [ -z "$OLD_PEER_KEY" ] || [ -z "$NEW_DEVICE_NAME" ]; then
+    echo "Usage: $0 <old-peer-key> <new-device-name>"
+    exit 1
+fi
+
+echo "Removing old device..."
+andasy wireguard remove -o "$ORG" -p "$OLD_PEER_KEY"
+
+echo "Creating peer for new device..."
+andasy wireguard create -o "$ORG" -f "./${NEW_DEVICE_NAME}.conf"
+
+echo "Device replacement complete"
+echo "Configuration saved to: ./${NEW_DEVICE_NAME}.conf"
+```
+
+### Audit-Driven Removal
+
+Remove peers based on security audit:
+
+```bash
+#!/bin/bash
+# audit-removal.sh
+
+ORG="my-org"
+AUDIT_FILE="$1"  # File containing peer keys to remove, one per line
+
+if [ ! -f "$AUDIT_FILE" ]; then
+    echo "Usage: $0 <audit-file>"
+    echo "Audit file should contain one peer public key per line"
+    exit 1
+fi
+
+echo "Removing peers listed in $AUDIT_FILE..."
+
+while IFS= read -r peer_key; do
+    # Skip empty lines and comments
+    [[ -z "$peer_key" || "$peer_key" =~ ^# ]] && continue
+    
+    echo "Removing peer: $peer_key"
+    andasy wireguard remove -o "$ORG" -p "$peer_key"
+done < "$AUDIT_FILE"
+
+echo "Audit-driven removal complete"
+```
+
+## Best Practices
+
+1. **Verify Before Removal**: Always verify the peer before removing:
+   ```bash
+   # List and verify
+   andasy wireguard list -o my-org
+   
+   # Then remove
+   andasy wireguard remove -o my-org -p "<key>"
+   ```
+
+2. **Document Removals**: Keep records of removed peers:
+   ```bash
+   # Log removal
+   echo "$(date): Removed peer <key> - Reason: User offboarding" >> removal-log.txt
+   andasy wireguard remove -o my-org -p "<key>"
+   ```
+
+3. **Immediate Action for Security**: Remove compromised peers immediately:
+   ```bash
+   # Don't delay security-related removals
+   andasy wireguard remove -o my-org -p "<compromised-key>"
+   ```
+
+4. **Batch Operations**: When removing multiple peers, use scripts:
+   ```bash
+   # Remove multiple peers safely
+   for peer in "${PEERS_TO_REMOVE[@]}"; do
+     andasy wireguard remove -o my-org -p "$peer"
+     sleep 1  # Rate limiting
+   done
+   ```
+
+5. **Backup Before Removal**: Consider backing up peer information:
+   ```bash
+   # Backup peer info before removal
+   andasy wireguard list -o my-org > backup-before-removal.list
+   andasy wireguard remove -o my-org -p "<key>"
+   ```
+
+6. **Verify Removal**: Confirm the peer was removed:
+   ```bash
+   # Remove peer
+   andasy wireguard remove -o my-org -p "<key>"
+   
+   # Verify it's gone
+   andasy wireguard list -o my-org | grep "<key>"
+   ```
+
+## Security Considerations
+
+1. **Immediate Effect**: Peer removal takes effect immediately. The device will lose VPN access.
+
+2. **No Recovery**: Once removed, the peer cannot be restored. A new peer must be created.
+
+3. **Configuration Invalidation**: Existing configuration files for the removed peer become invalid.
+
+4. **Access Logs**: Review access logs after removing potentially compromised peers.
+
+5. **Notification**: Consider notifying the peer owner before removal (except in security incidents).
+
+6. **Audit Trail**: Maintain logs of all peer removals for security auditing.
+
+## Post-Removal Actions
+
+After removing a peer:
+
+1. **Verify Removal**:
+   ```bash
+   andasy wireguard list -o my-org | grep "<removed-key>"
+   ```
+
+2. **Notify User** (if appropriate):
+   ```bash
+   echo "Your VPN access has been revoked. Contact IT if you need assistance."
+   ```
+
+3. **Delete Configuration Files**:
+   ```bash
+   # Securely delete old configuration
+   shred -u ./old-peer-config.conf
+   ```
+
+4. **Update Documentation**:
+   ```bash
+   # Update peer inventory
+   echo "$(date): Removed peer <key>" >> peer-changelog.txt
+   ```
+
+5. **Review Access Logs**:
+   ```bash
+   # Check for any suspicious activity from removed peer
+   # (Implementation depends on your logging system)
+   ```
+
+## Troubleshooting
+
+### Peer Not Found
+
+If the peer can't be found:
+
+```bash
+# List all peers to find the correct key
+andasy wireguard list -o my-org -a
+```
+
+### Permission Denied
+
+If you can't remove a peer:
+
+```bash
+# Check if it's your peer
+andasy wireguard list -o my-org
+
+# Check organization permissions
+andasy org show -o my-org
+
+# Try with verbose mode for more details
+andasy wireguard remove -o my-org -p "<key>"
+```
+
+### Removal Fails
+
+If removal fails:
+
+```bash
+# Try with verbose mode
+andasy wireguard remove -o my-org -p "<key>"
+
+# Check organization status
+andasy org show -o my-org
+
+# Verify network connectivity
+ping api.andasy.dev
+```
+
+### Already Removed
+
+If the peer was already removed:
+
+```bash
+# Verify current peer list
+andasy wireguard list -o my-org -a
+
+# Check if you have the correct public key
+```
+
+## Related Commands
+
+- [wireguard](/docs/services/wireguard)
+- [wireguard create](/docs/services/wireguard/create)
+- [wireguard config](/docs/services/wireguard/config)
+- [wireguard list](/docs/services/wireguard/list)
+
+---
+
+**Warning:** Peer removal is immediate and irreversible. The removed peer will immediately lose VPN access, and the configuration cannot be recovered. Always verify the peer before removal, especially in production environments.

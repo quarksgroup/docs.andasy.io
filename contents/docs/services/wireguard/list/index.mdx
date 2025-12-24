@@ -1,0 +1,147 @@
+---
+title: WireGuard list
+description: "List and manage WireGuard VPN peers connected to your organization"
+---
+
+# andasy wireguard list
+
+The `andasy wireguard list` command lists all peers connected to your organization's VPN, providing visibility into who and what has access to your secure network.
+
+## Overview
+
+This command enables you to:
+- View all peers connected to your organization's VPN
+- Audit VPN access across your organization
+- Identify peers for configuration retrieval or removal
+- Monitor VPN infrastructure
+- Track device and user access
+
+## Syntax
+
+```bash
+andasy wireguard list [flags]
+```
+
+## Aliases
+
+You can use the shorter alias:
+- `ls`
+
+Example using alias:
+```bash
+andasy wg ls -o my-org
+```
+
+## Optional Flags
+
+### `-o, --org <organization-slug>`
+
+Specifies the target Andasy organization.
+
+**Type:** String  
+**Required:** No (may be prompted if not provided)
+```bash
+andasy wireguard list -o my-production-org
+```
+
+### `-a, --all`
+
+Get all peers in the organization, not just your own. This requires appropriate permissions.
+
+**Type:** Boolean  
+**Required:** No  
+**Default:** false (only show your peers)
+
+```bash
+# List only your peers
+andasy wireguard list -o my-org
+
+# List all organization peers (requires admin access)
+andasy wireguard list -o my-org -a
+```
+
+### `-h, --help`
+
+Display help information for the list command.
+
+```bash
+andasy wireguard list --help
+```
+
+## Usage Examples
+
+### Example 1: List Your Peers
+
+List only peers that belong to you:
+
+```bash
+andasy wireguard list -o my-org
+```
+
+### Example 2: List All Organization Peers
+
+List all peers in the organization (requires admin permissions):
+
+```bash
+andasy wireguard list -o my-org -a
+```
+
+### Example 3: Using Alias
+
+Use the shorter command alias:
+
+```bash
+andasy wg ls -o my-org
+```
+
+## Security Considerations
+
+- **Access Control**: The `-a` flag requires appropriate permissions. Not all users can see all peers.
+- **Sensitive Information**: Peer lists may contain sensitive information about your infrastructure. Store securely.
+- **Regular Reviews**: Regularly review peer lists to ensure only authorized devices have access.
+- **Audit Trails**: Maintain logs of peer list exports for security auditing.
+
+## Troubleshooting
+
+### Permission Denied with -a Flag
+
+If you can't list all peers:
+
+```bash
+# Check your permissions
+andasy org show -o my-org
+
+# Try without -a flag
+andasy wireguard list -o my-org
+```
+
+### Empty List
+
+If no peers are shown:
+
+```bash
+# Verify organization
+andasy org list
+
+# Check if you have any peers
+andasy wireguard list -o my-org
+
+# Try with -a flag (if you have permissions)
+andasy wireguard list -o my-org -a
+```
+
+### Outdated Information
+
+If peer information seems outdated:
+
+```bash
+# Check specific peer
+andasy wireguard config -o my-org -p "<public-key>"
+```
+
+## Related Commands
+
+- [wireguard](/docs/services/wireguard)
+- [wireguard create](/docs/services/wireguard/create)
+- [wireguard config](/docs/services/wireguard/config)
+- [wireguard remove](/docs/services/wireguard/remove)

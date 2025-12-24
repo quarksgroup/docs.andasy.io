@@ -1,0 +1,303 @@
+---
+title: WireGuard
+description: "Manage WireGuard VPN peers and connections for secure organization network isolation"
+---
+
+# andasy wireguard
+
+The `andasy wireguard` command suite provides management capabilities for WireGuard VPN peers and connections within your organization. WireGuard creates an isolated virtual private network (VPN) that securely connects all of your organization's machines while keeping them isolated from other organizations.
+
+## Overview
+
+WireGuard is a modern, high-performance VPN protocol that provides:
+- Secure, encrypted connections between organization machines
+- Network isolation from other organizations
+- Simple peer management
+- Fast and efficient VPN tunneling
+- Cross-platform compatibility
+
+With the `andasy wireguard` commands, you can:
+- Create new VPN peers for devices and users
+- List all peers connected to your organization's VPN
+- Generate WireGuard configuration files
+- Remove peers from the VPN
+- Manage organization-wide network security
+
+## Syntax
+
+```bash
+andasy wireguard [command]
+```
+
+## Aliases
+
+You can use the shorter alias:
+- `wg`
+
+Example using alias:
+```bash
+andasy wg list -o my-org
+```
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `config` | Retrieve WireGuard configuration for a specific peer |
+| `create` | Create a new peer in the organization VPN |
+| `list` | List all peers connected to the organization VPN |
+| `remove` | Remove a peer from the organization VPN |
+
+## Global Flags
+
+These flags are available across all WireGuard commands:
+
+### `-v, --verbose`
+
+Enable verbose output to see detailed information about WireGuard operations.
+
+```bash
+andasy wireguard create -o my-org --verbose
+```
+
+### `-h, --help`
+
+Display help information for the wireguard command or any subcommand.
+
+```bash
+andasy wireguard --help
+andasy wireguard create --help
+```
+
+## Quick Start Examples
+
+### Create a New Peer
+
+```bash
+andasy wireguard create -o my-org -f ./peer-config.conf
+```
+
+### List All Peers
+
+```bash
+andasy wireguard list -o my-org
+```
+
+### Get Peer Configuration
+
+```bash
+andasy wireguard config -o my-org -p <public-key> -f ./config.conf
+```
+
+### Remove a Peer
+
+```bash
+andasy wireguard remove -o my-org -p <public-key>
+```
+
+## Understanding WireGuard VPN
+
+### What is WireGuard?
+
+WireGuard is a modern VPN protocol that:
+- Uses state-of-the-art cryptography
+- Provides faster performance than traditional VPN protocols
+- Has a smaller codebase, making it more secure and easier to audit
+- Works seamlessly across different platforms and networks
+
+### Organization VPN Isolation
+
+Each Andasy organization has its own isolated VPN network:
+- Machines within the same organization can communicate securely
+- Machines from different organizations are completely isolated
+- All traffic is encrypted end-to-end
+- Network access is controlled through peer management
+
+### Peers
+
+A "peer" in WireGuard terminology is:
+- A device or machine connected to the VPN
+- Identified by a unique public key
+- Configured with specific network permissions
+- Can be a server, workstation, laptop, or mobile device
+
+## Common Use Cases
+
+### Secure Remote Access
+
+Enable team members to securely access organization resources:
+
+```bash
+# Create peer for remote developer
+andasy wireguard create -o my-org -f ./developer-laptop.conf
+
+# Distribute configuration to team member
+# They install it on their device to connect to the VPN
+```
+
+### Multi-Server Communication
+
+Connect multiple servers within your organization:
+
+```bash
+# Create peer for database server
+andasy wireguard create -o my-org -f ./db-server.conf
+
+# Create peer for application server
+andasy wireguard create -o my-org -f ./app-server.conf
+
+# Servers can now communicate securely over the VPN
+```
+
+### CI/CD Pipeline Integration
+
+Add VPN access for CI/CD runners:
+
+```bash
+# Create peer for CI/CD runner
+andasy wireguard create -o my-org -f ./ci-runner.conf
+
+# Configure runner with the VPN configuration
+# Runner can now access internal resources during builds
+```
+
+### Device Management
+
+Manage all connected devices:
+
+```bash
+# List all connected devices
+andasy wireguard list -o my-org -a
+
+# Remove old or compromised devices
+andasy wireguard remove -o my-org -p <old-device-public-key>
+```
+
+## Security Considerations
+
+1. **Private Key Security**: Never share or expose private keys. They should remain on the device they were generated for.
+
+2. **Peer Removal**: Immediately remove peers for:
+   - Devices that are lost or stolen
+   - Team members who leave the organization
+   - Compromised or suspected compromised devices
+
+3. **Regular Audits**: Periodically review connected peers:
+   ```bash
+   andasy wireguard list -o my-org -a
+   ```
+
+4. **Configuration Files**: Store WireGuard configuration files securely:
+   - Use encrypted storage
+   - Limit file permissions (chmod 600)
+   - Don't commit to version control
+
+5. **Access Control**: Only create peers for authorized devices and users.
+
+## Best Practices
+
+1. **Descriptive Naming**: Use descriptive filenames for configurations:
+   ```bash
+   andasy wireguard create -o my-org -f ./john-laptop-2024.conf
+   ```
+
+2. **Documentation**: Maintain a record of which peer belongs to which device/user.
+
+3. **Lifecycle Management**: 
+   - Create peers when onboarding new devices
+   - Remove peers when offboarding devices or users
+   - Rotate peers periodically for enhanced security
+
+4. **Backup Configurations**: Keep secure backups of critical peer configurations.
+
+5. **Monitor Connections**: Regularly list peers to ensure only authorized devices are connected.
+
+
+## Troubleshooting
+
+### Connection Issues
+
+If a peer can't connect to the VPN:
+
+```bash
+# Verify peer exists
+andasy wireguard list -o my-org
+
+# Regenerate configuration
+andasy wireguard config -o my-org -p <public-key> -f ./new-config.conf
+
+# Check verbose output
+andasy wireguard config -o my-org -p <public-key> --verbose
+```
+
+### Configuration Problems
+
+If configuration file is invalid:
+
+```bash
+# Regenerate with verbose mode
+andasy wireguard create -o my-org -f ./config.conf --verbose
+
+# Verify WireGuard installation on device
+wg --version
+```
+
+### Peer Not Found
+
+If you can't find a specific peer:
+
+```bash
+# List all peers including others' peers
+andasy wireguard list -o my-org -a
+```
+
+## WireGuard Installation
+
+Before using peer configurations, ensure WireGuard is installed on the target device:
+
+### Linux
+```bash
+# Ubuntu/Debian
+sudo apt install wireguard
+
+# Fedora/RHEL
+sudo dnf install wireguard-tools
+
+# Arch
+sudo pacman -S wireguard-tools
+```
+
+### macOS
+```bash
+brew install wireguard-tools
+# Or download WireGuard app from App Store
+```
+
+### Windows
+Download and install from: https://www.wireguard.com/install/
+
+### Mobile
+- **iOS**: Install WireGuard from App Store
+- **Android**: Install WireGuard from Google Play Store
+
+## Related Commands
+
+- `andasy org` - Organization management commands
+- `andasy ssh` - SSH access to applications
+- `andasy app` - Application management
+
+## Additional Resources
+
+- [WireGuard Official Documentation](https://www.wireguard.com/)
+
+## Command Details
+
+For detailed information about each subcommand, see:
+- [andasy wireguard config](/docs/services/wireguard/config) - Get peer configuration
+- [andasy wireguard create](/docs/services/wireguard/create) - Create new peer
+- [andasy wireguard list](/docs/services/wireguard/list) - List all peers
+- [andasy wireguard remove](/docs/services/wireguard/remove) - Remove peer
+
+---
+
+**Note:** WireGuard VPN provides organization-level network isolation. All machines within an organization can communicate securely, while remaining isolated from other organizations' networks.
