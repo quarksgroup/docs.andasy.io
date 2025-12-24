@@ -1,0 +1,187 @@
+---
+title: SFTP shell
+description: "Interactive SFTP session for managing files on remote Andasy application VMs"
+---
+
+# andasy ssh sftp shell
+
+The `andasy ssh sftp shell` command opens an interactive SFTP session, allowing you to perform multiple file operations without reconnecting for each command.
+
+## Overview
+
+This command enables you to:
+- Open an interactive SFTP session with your remote VM
+- Execute multiple file operations in a single session
+- Browse directories interactively
+- Upload and download multiple files efficiently
+- Perform file management tasks without repeated authentication
+
+## Syntax
+
+```bash
+andasy ssh sftp shell [flags]
+```
+
+## Aliases
+
+You can use shorter versions of this command:
+- `shell`
+- `sh`
+
+Example using alias:
+```bash
+andasy ssh sftp sh -a my-app
+```
+
+## Required Flags
+
+### `-a, --app <app-name>`
+
+Specifies the target Andasy application to connect to.
+
+**Type:** String  
+**Required:** Yes (unless `andasy.hcl` is in the current working directory)
+
+```bash
+andasy ssh sftp shell -a my-production-app
+```
+
+## Optional Flags
+
+### `-h, --help`
+
+Display help information for the shell command.
+
+```bash
+andasy ssh sftp shell --help
+```
+
+## Usage Examples
+
+### Example 1: Open Interactive SFTP Session
+
+Open an interactive SFTP session:
+
+```bash
+andasy ssh sftp shell -a my-app
+```
+
+Once connected, you'll see an SFTP prompt where you can execute commands:
+```
+sftp>
+```
+
+### Example 2: Using Alias
+
+Open session using the shorter alias:
+
+```bash
+andasy ssh sftp sh -a my-app
+```
+
+## Interactive SFTP Commands
+
+Once inside the SFTP shell, you can use standard SFTP commands:
+
+### Navigation Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `cd <path>` | Change remote directory | `cd /app/config` |
+| `ls [path]` | List remote directory | `ls /app` |
+
+### File Transfer Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `get <remote> [local]` | Download file or directory | `get config.yaml` |
+| `put <local> [remote]` | Upload file or directory | `put ./config.yaml` |
+
+### File Management Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `chmod <mode> <file>` | Change file permissions | `chmod 0755 script.sh` |
+
+
+## Interactive Session Examples
+
+### Example 1: Browse and Download Files
+
+```bash
+$ andasy ssh sftp shell -a my-app
+sftp> ls
+production.yaml
+development.yaml
+secrets.yaml
+sftp> get production.yaml ./backup/
+Fetching /app/config/production.yaml to ./backup/production.yaml
+```
+
+### Example 2: Upload a File
+
+```bash
+$ andasy ssh sftp shell -a my-app
+sftp> cd /app/scripts
+sftp> put deploy.sh
+sftp> chmod 0755 deploy.sh
+```
+
+### Example 3: Backup Configuration Directory
+
+```bash
+$ andasy ssh sftp shell -a my-app
+sftp> cd /app
+sftp> get config ./backup/config-$(date +%Y%m%d)
+Fetching /app/config/ to ./backup/config-20240115/
+```
+
+### Example 4: Deploy New Assets
+
+```bash
+$ andasy ssh sftp shell -a my-app
+sftp> cd /app/public
+sftp> put ./dist/assets/
+Uploading ./dist/assets/ to /app/public/assets/
+```
+
+## Troubleshooting
+
+### Connection Drops
+
+If the connection drops during a session:
+
+```bash
+# Reconnect
+andasy ssh sftp shell -a my-app
+```
+
+### Permission Errors
+
+If you encounter permission errors:
+
+```bash
+# Check file permissions
+$ andasy ssh shell -a my-app -c "ls -la"
+
+# Reconnect to SFTP
+$ andasy ssh sftp shell -a my-app
+```
+
+## Security Considerations
+
+- Interactive sessions have full file system access based on user permissions
+- Always exit sessions properly to avoid leaving connections open
+- Set appropriate permissions with `chmod` after uploading sensitive files
+- Monitor session activity and timeout idle sessions
+
+## Related Commands
+
+- [sftp](/docs/services/ssh/sftp)
+- [sftp find](/docs/services/ssh/sftp/find)
+- [sftp get](/docs/services/ssh/sftp/get)
+- [sftp put](/docs/services/ssh/sftp/put)
+
+---
+
+**Tip:** If you want more controls provided by SFTP protocol, make a proxy to SSH server of your VM with [`andasy proxy`](/docs/services/proxy)(it listens on TCP port `22`) and connect with an external SFTP program.

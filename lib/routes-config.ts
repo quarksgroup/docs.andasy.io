@@ -37,7 +37,33 @@ export const ROUTES: EachRoute[] = [
     href: "/services",
     noLink: true,
     items: [
-      { title: "SSH", href: "/ssh" },
+      {
+        title: "SSH",
+        href: "/ssh",
+        items: [
+          { title: "shell", href: "/shell" },
+          {
+            title: "sftp",
+            href: "/sftp",
+            items: [
+              { title: "get", href: "/get" },
+              { title: "find", href: "/find" },
+              { title: "put", href: "/put" },
+              { title: "shell", href: "/shell" },
+            ]
+          },
+        ]
+      },
+      {
+        title: "WireGuard",
+        href: "/wireguard",
+        items: [
+          { title: "create", href: "/create" },
+          { title: "config", href: "/config" },
+          { title: "list", href: "/list" },
+          { title: "remove", href: "/remove" },
+        ]
+      },
       { title: "Proxy", href: "/proxy" },
       { title: "Logs", href: "/logs" },
       { title: "Metrics", href: "/metrics" },

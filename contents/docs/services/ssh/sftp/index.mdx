@@ -1,0 +1,127 @@
+---
+title: SFTP
+description: "Secure file transfer protocol commands for managing files on remote Andasy application VMs"
+---
+
+# andasy ssh sftp
+
+The `andasy ssh sftp` command provides secure file transfer capabilities using the SFTP protocol to interact with files on your Andasy application's virtual machines. This command suite enables you to browse, download, upload, and manage files remotely.
+
+## Overview
+
+SFTP (SSH File Transfer Protocol) provides secure file transfer over SSH connections. With the `andasy ssh sftp` commands, you can:
+- Browse and list files on remote VMs
+- Download files and directories from your applications
+- Upload files and directories to your applications
+- Use an interactive SFTP shell for multiple operations
+- Manage file permissions during uploads
+
+## Syntax
+
+```bash
+andasy ssh sftp [command]
+```
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `find` | List files on a remote VM from an optional root directory |
+| `get` | Retrieve files or directories from a remote VM |
+| `put` | Upload files or directories to a remote VM |
+| `shell` | Open an interactive SFTP session |
+
+## Global Flags
+
+### `-v, --verbose`
+
+Enable verbose output to see detailed information about the SFTP operations.
+
+```bash
+andasy ssh sftp get /app/config.yaml --verbose
+```
+
+### `-h, --help`
+
+Display help information for the sftp command or any subcommand.
+
+```bash
+andasy ssh sftp --help
+andasy ssh sftp get --help
+```
+
+## Quick Start Examples
+
+### List Files on Remote VM
+
+```bash
+andasy ssh sftp find /app -a my-app
+```
+
+### Download a File
+
+```bash
+andasy ssh sftp get /app/config.yaml ./local-config.yaml -a my-app
+```
+
+### Upload a File
+
+```bash
+andasy ssh sftp put ./deploy.sh /app/scripts/deploy.sh -a my-app
+```
+
+### Interactive SFTP Session
+
+```bash
+andasy ssh sftp shell -a my-app
+```
+
+## Common Use Cases
+
+### Backup Configuration Files
+
+Download important configuration files for backup:
+
+```bash
+andasy ssh sftp get /app/config -R -a production-app
+```
+
+### Deploy Scripts or Assets
+
+Upload deployment scripts or static assets:
+
+```bash
+andasy ssh sftp put ./scripts /app/scripts -R -a my-app
+```
+
+### Retrieve Log Files
+
+Download log files for local analysis:
+
+```bash
+andasy ssh sftp get /var/log/app.log ./logs/ -a my-app
+```
+
+### Browse Application Structure
+
+Explore the directory structure of your application:
+
+```bash
+andasy ssh sftp find / -a my-app
+```
+
+## Additional Resources
+
+- [SSH Access Guide](/docs/services/ssh)
+
+## Command Details
+
+For detailed information about each subcommand, see:
+- [andasy ssh sftp find](/docs/services/ssh/sftp/find) - List files on remote VM
+- [andasy ssh sftp get](/docs/services/ssh/sftp/get) - Download files from remote VM
+- [andasy ssh sftp put](/docs/services/ssh/sftp/put) - Upload files to remote VM
+- [andasy ssh sftp shell](/docs/services/ssh/sftp/shell) - Interactive SFTP session
+
+---
+
+**Note:** SFTP access requires SSH connectivity to be enabled for your application. Contact your Andasy administrator if SFTP operations fail due to access restrictions.

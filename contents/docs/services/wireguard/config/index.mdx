@@ -1,0 +1,360 @@
+---
+title: WireGuard config
+description: "Retrieve WireGuard configuration for existing VPN peers"
+---
+
+# andasy wireguard config
+
+The `andasy wireguard config` command retrieves the WireGuard configuration for a peer connected to your organization's VPN. This command only works for peers associated with your account, and you must know the peer's private key.
+
+## Overview
+
+This command enables you to:
+- Retrieve configuration for existing peers
+- Regenerate lost configuration files
+- Export configurations for backup purposes
+- Reconfigure devices with updated settings
+
+## Syntax
+
+```bash
+andasy wireguard config [flags]
+```
+
+## Aliases
+
+You can use the shorter alias:
+- `conf`
+
+Example using alias:
+```bash
+andasy wg conf -o my-org -p <public-key> -f ./config.conf
+```
+
+## Optional Flags
+
+### `-o, --org <organization-slug>`
+
+Specifies the target Andasy organization.
+
+**Type:** String  
+**Required:** No (may be prompted if not provided)
+
+```bash
+andasy wireguard config -o my-production-org -f ./config.conf
+```
+
+
+### `-p, --peer <public-key>`
+
+The public key of the peer whose configuration you want to retrieve. If omitted, you may be prompted to select from your peers.
+
+**Type:** String  
+**Required:** No (may be prompted if not provided)
+
+```bash
+andasy wireguard config -o my-org -p "ABC123...XYZ789=" -f ./config.conf
+```
+
+### `-f, --file <file-path>`
+
+Output file path for the configuration. If omitted, the configuration is printed to stdout (terminal).
+
+**Type:** String  
+**Required:** No  
+**Default:** stdout
+
+```bash
+# Save to file
+andasy wireguard config -o my-org -p <public-key> -f ./peer-config.conf
+
+# Print to terminal
+andasy wireguard config -o my-org -p <public-key>
+```
+
+### `-h, --help`
+
+Display help information for the config command.
+
+```bash
+andasy wireguard config --help
+```
+
+## Usage Examples
+
+### Example 1: Retrieve Configuration to File
+
+Save peer configuration to a file:
+
+```bash
+andasy wireguard config -o my-org -p "ABC123...XYZ=" -f ./laptop-config.conf
+```
+
+### Example 2: Print Configuration to Terminal
+
+Display configuration in the terminal:
+
+```bash
+andasy wireguard config -o my-org -p "ABC123...XYZ="
+```
+
+### Example 3: Retrieve Without Specifying Peer
+
+Let the command prompt you to select a peer:
+
+```bash
+andasy wireguard config -o my-org -f ./config.conf
+```
+
+### Example 4: Using Alias
+
+Use the shorter command alias:
+
+```bash
+andasy wg conf -o my-org -f ./config.conf
+```
+
+### Example 5: Backup All Configurations
+
+Retrieve configurations for backup:
+
+```bash
+# List all peers first
+andasy wireguard list -o my-org -a
+
+# Retrieve each configuration
+andasy wireguard config -o my-org -p "PEER1_KEY=" -f ./backup/peer1.conf
+andasy wireguard config -o my-org -p "PEER2_KEY=" -f ./backup/peer2.conf
+```
+
+### Example 6: Pipe to Another Command
+
+Process configuration with other tools:
+
+```bash
+andasy wireguard config -o my-org -p "ABC123...XYZ=" | grep "AllowedIPs"
+```
+
+## Configuration File Format
+
+The retrieved WireGuard configuration file follows the standard WireGuard format:
+
+```ini
+[Interface]
+PrivateKey = YOUR_PRIVATE_KEY_HERE(you must have kept it somewhere since we don't keep it)
+Address = fdc7:0:d2::b6:0:6a/128
+DNS = fdc7:0:d2::3
+MTU = 1280
+
+[Peer]
+PublicKey = SERVER_PUBLIC_KEY_HERE
+Endpoint = gate0.andasy.io:51821
+AllowedIPs = fdc7::/16
+PersistentKeepalive = 15
+```
+
+### Configuration Sections
+
+#### [Interface]
+- **PrivateKey**: The peer's private key (keep this secret!)
+- **Address**: The IP address assigned to this peer within the VPN
+- **DNS**: DNS server to use when connected to the VPN
+
+#### [Peer]
+- **PublicKey**: The VPN server's public key
+- **Endpoint**: The VPN server's address and port
+- **AllowedIPs**: IP ranges that should be routed through the VPN
+- **PersistentKeepalive**: Interval (in seconds) to send keepalive packets
+
+## Using the Configuration
+
+### Linux
+
+```bash
+# Copy configuration to WireGuard directory
+sudo cp ./config.conf /etc/wireguard/wg0.conf
+
+# Set proper permissions
+sudo chmod 600 /etc/wireguard/wg0.conf
+
+# Start the VPN
+sudo wg-quick up wg0
+
+# Enable on boot
+sudo systemctl enable wg-quick@wg0
+```
+
+### macOS
+
+```bash
+# Import into WireGuard app
+# Or use command line:
+sudo wg-quick up ./config.conf
+```
+
+### Windows
+
+1. Open WireGuard application
+2. Click "Import tunnel(s) from file"
+3. Select the configuration file
+4. Click "Activate"
+
+### Mobile (iOS/Android)
+
+1. Open WireGuard app
+2. Tap "+" or "Add tunnel"
+3. Choose "Create from file or archive"
+4. Select the configuration file
+5. Activate the tunnel
+
+## Common Use Cases
+
+### Recover Lost Configuration
+
+If a team member loses their VPN configuration:
+
+```bash
+# Get their peer public key
+andasy wireguard list -o my-org
+
+# Regenerate their configuration
+andasy wireguard config -o my-org -p "<their-public-key>" -f ./recovered.conf
+
+# Securely send them the new configuration file
+```
+
+### Reconfigure Device
+
+Update a device's VPN configuration:
+
+```bash
+# Retrieve updated configuration
+andasy wireguard config -o my-org -p "<peer-key>" -f ./new-config.conf
+
+# On the device, stop current VPN
+sudo wg-quick down wg0
+
+# Replace configuration
+sudo cp ./new-config.conf /etc/wireguard/wg0.conf
+
+# Restart VPN
+sudo wg-quick up wg0
+```
+
+### Configuration Verification
+
+Verify configuration before deploying:
+
+```bash
+# Retrieve configuration
+andasy wireguard config -o my-org -p "<peer-key>" -f ./verify.conf
+
+# Check configuration syntax
+sudo wg-quick strip ./verify.conf
+
+# Test connection
+sudo wg-quick up ./verify.conf
+# ... test connectivity ...
+sudo wg-quick down ./verify.conf
+```
+
+## Best Practices
+
+1. **Secure Storage**: Store configuration files securely with restricted permissions:
+   ```bash
+   chmod 600 ./config.conf
+   ```
+
+2. **Never Share Private Keys**: Configuration files contain private keys. Never commit them to version control or share them insecurely.
+
+3. **Use Descriptive Filenames**: Name configuration files descriptively:
+   ```bash
+   andasy wireguard config -o my-org -p "<key>" -f ./john-laptop-2024-01.conf
+   ```
+
+4. **Regular Backups**: Maintain secure backups of all peer configurations.
+
+5. **Verify After Retrieval**: Always verify the configuration works before distributing:
+   ```bash
+   # Test configuration
+   sudo wg-quick up ./config.conf
+   # ... verify connectivity ...
+   sudo wg-quick down ./config.conf
+   ```
+
+6. **Secure Distribution**: When sharing configurations with team members:
+   - Use encrypted channels (encrypted email, secure file sharing)
+   - Delete from insecure locations after transfer
+   - Confirm receipt and proper installation
+
+## Security Considerations
+
+- **Private Key Exposure**: Configuration files contain private keys. Treat them as sensitive credentials.
+- **File Permissions**: Always set restrictive permissions (600) on configuration files.
+- **Secure Transmission**: Use encrypted channels when transferring configurations.
+- **No Version Control**: Never commit configuration files to Git or other version control systems.
+- **Secure Deletion**: Use secure deletion methods when removing old configurations:
+  ```bash
+  shred -u ./old-config.conf
+  ```
+
+## Troubleshooting
+
+### Peer Not Found
+
+If the peer can't be found:
+
+```bash
+# List all your peers
+andasy wireguard list -o my-org
+```
+
+### Permission Denied
+
+If you can't retrieve a peer's configuration:
+
+```bash
+# Verify it's your peer
+andasy wireguard list -o my-org
+
+# Check if you need the -a flag
+andasy wireguard list -o my-org -a
+```
+
+### Invalid Configuration
+
+If the retrieved configuration doesn't work:
+
+```bash
+# Retrieve again
+andasy wireguard config -o my-org -p "<key>"
+
+# Verify configuration syntax
+wg-quick strip ./config.conf
+```
+
+### File Write Errors
+
+If you can't write to the specified file:
+
+```bash
+# Check directory permissions
+ls -la $(dirname ./config.conf)
+
+# Create directory if needed
+mkdir -p $(dirname ./config.conf)
+
+# Try writing to a different location
+andasy wireguard config -o my-org -p "<key>" -f ~/config.conf
+```
+
+## Related Commands
+
+- [wireguard](/docs/services/wireguard)
+- [wireguard create](/docs/services/wireguard/create)
+- [wireguard list](/docs/services/wireguard/list)
+- [wireguard remove](/docs/services/wireguard/remove)
+
+---
+
+**Important:** Configuration files contain private keys. Always store them securely, set restrictive permissions (chmod 600), and never commit them to version control.

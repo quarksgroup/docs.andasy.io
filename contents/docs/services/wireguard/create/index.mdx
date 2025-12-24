@@ -1,0 +1,483 @@
+---
+title: WireGuard create
+description: "Create new WireGuard VPN peers for secure organization network access"
+---
+
+# andasy wireguard create
+
+The `andasy wireguard create` command creates a new peer in your organization's VPN and returns its WireGuard configuration. This allows you to add new devices or users to your secure network.
+
+## Overview
+
+This command enables you to:
+- Create new VPN peers for devices and users
+- Generate complete WireGuard configurations automatically
+- Onboard new team members to the organization VPN
+- Add servers and services to the secure network
+- Expand your organization's VPN infrastructure
+
+## Syntax
+
+```bash
+andasy wireguard create [flags]
+```
+
+## Optional Flags
+
+### `-o, --org <organization-slug>`
+
+Specifies the target Andasy organization where the peer will be created.
+
+**Type:** String  
+**Required:** No (may be prompted if not provided)
+
+```bash
+andasy wireguard create -o my-production-org
+```
+
+### `-f, --file <file-path>`
+
+Output file path for the generated configuration. If omitted, the configuration is printed to stdout (terminal).
+
+**Type:** String  
+**Required:** No  
+**Default:** stdout
+
+```bash
+# Save to file
+andasy wireguard create -o my-org -f ./laptop-config.conf
+
+# Print to terminal
+andasy wireguard create -o my-org
+```
+
+### `-h, --help`
+
+Display help information for the create command.
+
+```bash
+andasy wireguard create --help
+```
+
+## Usage Examples
+
+### Example 1: Create Peer with Configuration File
+
+Create a new peer and save configuration to a file:
+
+```bash
+andasy wireguard create -o my-org -f ./developer-laptop.conf
+```
+
+### Example 2: Create Peer and Print to Terminal
+
+Create a peer and display configuration in terminal:
+
+```bash
+andasy wireguard create -o my-org
+```
+
+### Example 3: Create Multiple Peers
+
+Create multiple peers for different devices:
+
+```bash
+# Laptop
+andasy wireguard create -o my-org -f ./john-laptop.conf
+
+# Desktop
+andasy wireguard create -o my-org -f ./john-desktop.conf
+
+# Mobile
+andasy wireguard create -o my-org -f ./john-mobile.conf
+```
+
+### Example 4: Automated Peer Creation
+
+Create peer in an automated script:
+
+```bash
+#!/bin/bash
+ORG="my-org"
+USER="john"
+DEVICE="laptop"
+DATE=$(date +%Y%m%d)
+
+andasy wireguard create -o "$ORG" -f "./configs/${USER}-${DEVICE}-${DATE}.conf"
+```
+
+### Example 5: Create and Distribute
+
+Create peer and prepare for distribution:
+
+```bash
+# Create configuration
+andasy wireguard create -o my-org -f ./new-peer.conf
+
+# Set secure permissions
+chmod 600 ./new-peer.conf
+
+# Create QR code for mobile devices (optional)
+qrencode -t ansiutf8 < ./new-peer.conf
+```
+
+## Generated Configuration
+
+The command generates a complete WireGuard configuration file:
+
+```ini
+[Interface]
+PrivateKey = GENERATED_PRIVATE_KEY
+Address = fdc7:0:d2::b6:0:6a/128
+DNS = fdc7:0:d2::3
+MTU = 1280
+
+[Peer]
+PublicKey = SERVER_PUBLIC_KEY_HERE
+Endpoint = gate0.andasy.io:51821
+AllowedIPs = fdc7::/16
+PersistentKeepalive = 15
+```
+
+### What Gets Generated
+
+1. **Private Key**: A unique private key for this peer (keep it somewhere safe since we don't keep it!)
+2. **IP Address**: An assigned IP address within the VPN network
+3. **DNS Configuration**: DNS server for name resolution within the VPN
+4. **Server Details**: Connection information for the VPN server
+5. **Network Routes**: Which traffic should go through the VPN
+
+## Common Use Cases
+
+### Onboarding New Team Members
+
+Create VPN access for new employees:
+
+```bash
+# Create peer for new developer
+andasy wireguard create -o my-org -f ./onboarding/alice-laptop.conf
+
+# Securely send configuration to Alice
+# She can now access internal resources
+```
+
+### Adding New Servers
+
+Connect new servers to the organization VPN:
+
+```bash
+# Create peer for application server
+andasy wireguard create -o my-org -f ./servers/app-server-01.conf
+
+# Create peer for database server
+andasy wireguard create -o my-org -f ./servers/db-server-01.conf
+
+# Deploy configurations to servers
+scp ./servers/app-server-01.conf app-server:/etc/wireguard/wg0.conf
+scp ./servers/db-server-01.conf db-server:/etc/wireguard/wg0.conf
+```
+
+### Multi-Device Access
+
+Provide VPN access across multiple devices for a user:
+
+```bash
+# Work laptop
+andasy wireguard create -o my-org -f ./bob/work-laptop.conf
+
+# Personal laptop
+andasy wireguard create -o my-org -f ./bob/personal-laptop.conf
+
+# Mobile phone
+andasy wireguard create -o my-org -f ./bob/mobile.conf
+
+# Tablet
+andasy wireguard create -o my-org -f ./bob/tablet.conf
+```
+
+### CI/CD Integration
+
+Add VPN access for automated systems:
+
+```bash
+# Create peer for GitHub Actions runner
+andasy wireguard create -o my-org -f ./ci/github-runner.conf
+
+# Create peer for Jenkins agent
+andasy wireguard create -o my-org -f ./ci/jenkins-agent.conf
+
+# Store configurations as secrets in CI/CD system
+```
+
+### Temporary Access
+
+Create peers for contractors or temporary access:
+
+```bash
+# Create peer for contractor
+andasy wireguard create -o my-org -f ./temp/contractor-$(date +%Y%m%d).conf
+
+# Document expiration date
+echo "Created: $(date), Expires: $(date -d '+30 days')" >> ./temp/contractor-access.log
+
+# Remember to remove after project completion
+```
+
+## Deployment Workflow
+
+### 1. Create the Peer
+
+```bash
+andasy wireguard create -o my-org -f ./config.conf
+```
+
+### 2. Secure the Configuration
+
+```bash
+# Set restrictive permissions
+chmod 600 ./config.conf
+
+# Verify permissions
+ls -la ./config.conf
+```
+
+### 3. Distribute Securely
+
+```bash
+# Option A: Encrypted email
+gpg --encrypt --recipient user@example.com ./config.conf
+
+# Option B: Secure file sharing
+# Upload to encrypted file sharing service
+
+# Option C: In-person transfer
+# Copy to encrypted USB drive
+```
+
+### 4. Install on Device
+
+**Linux:**
+```bash
+sudo cp ./config.conf /etc/wireguard/wg0.conf
+sudo chmod 600 /etc/wireguard/wg0.conf
+sudo wg-quick up wg0
+sudo systemctl enable wg-quick@wg0
+```
+
+**macOS:**
+```bash
+# Import into WireGuard app or:
+sudo wg-quick up ./config.conf
+```
+
+**Windows:**
+- Open WireGuard app
+- Import tunnel from file
+- Activate tunnel
+
+**Mobile:**
+- Open WireGuard app
+- Scan QR code or import file
+- Activate tunnel
+
+### 5. Verify Connection
+
+```bash
+# Check VPN status
+sudo wg show
+
+# Test connectivity
+ping6 `{your_peer_private_address}`
+
+# Verify access to internal resources
+curl http://app-name.internal.andasy.dev
+```
+
+## Best Practices
+
+1. **Descriptive Filenames**: Use clear, descriptive names for configuration files:
+   ```bash
+   andasy wireguard create -o my-org -f ./users/john-doe-laptop-2024-01-15.conf
+   ```
+
+2. **Secure Storage**: Immediately secure the generated configuration:
+   ```bash
+   andasy wireguard create -o my-org -f ./config.conf
+   chmod 600 ./config.conf
+   ```
+
+
+3. **Organized Structure**: Maintain an organized directory structure:
+   ```
+   vpn-configs/
+   ├── users/
+   │   ├── alice/
+   │   │   ├── laptop.conf
+   │   │   └── mobile.conf
+   │   └── bob/
+   │       └── desktop.conf
+   ├── servers/
+   │   ├── app-server.conf
+   │   └── db-server.conf
+   └── ci/
+       └── runner.conf
+   ```
+
+5. **Backup Configurations**: Maintain encrypted backups:
+   ```bash
+   # Create backup
+   tar czf vpn-configs-$(date +%Y%m%d).tar.gz ./vpn-configs/
+   gpg --encrypt vpn-configs-$(date +%Y%m%d).tar.gz
+   ```
+
+6. **Lifecycle Management**: Track peer lifecycle:
+   ```bash
+   # Create with metadata
+   andasy wireguard create -o my-org -f ./peer.conf
+   echo "Created: $(date), Owner: John Doe, Purpose: Development" > ./peer.conf.meta
+   ```
+
+## Automation Examples
+
+### Bulk Peer Creation
+
+```bash
+#!/bin/bash
+# create-team-peers.sh
+
+ORG="my-org"
+USERS=("alice" "bob" "charlie" "diana")
+
+for user in "${USERS[@]}"; do
+    echo "Creating peer for $user..."
+    andasy wireguard create -o "$ORG" -f "./team/${user}-laptop.conf"
+    chmod 600 "./team/${user}-laptop.conf"
+    echo "Created: ./team/${user}-laptop.conf"
+done
+```
+
+### Onboarding Script
+
+```bash
+#!/bin/bash
+# onboard-user.sh
+
+ORG="$1"
+USERNAME="$2"
+EMAIL="$3"
+
+if [ -z "$ORG" ] || [ -z "$USERNAME" ] || [ -z "$EMAIL" ]; then
+    echo "Usage: $0 <org> <username> <email>"
+    exit 1
+fi
+
+CONFIG_FILE="./onboarding/${USERNAME}-$(date +%Y%m%d).conf"
+
+echo "Creating VPN peer for $USERNAME..."
+andasy wireguard create -o "$ORG" -f "$CONFIG_FILE"
+
+chmod 600 "$CONFIG_FILE"
+
+echo "Peer created: $CONFIG_FILE"
+echo "Please securely send this configuration to $EMAIL"
+```
+
+## Security Considerations
+
+1. **Private Key Security**: The generated configuration contains a private key. Treat it as a sensitive credential.
+
+2. **Secure Distribution**: Always use encrypted channels to distribute configurations:
+   - Encrypted email (GPG/PGP)
+   - Secure file sharing services
+   - In-person transfer on encrypted media
+
+3. **File Permissions**: Immediately set restrictive permissions:
+   ```bash
+   chmod 600 ./config.conf
+   ```
+
+4. **No Version Control**: Never commit configuration files to Git:
+   ```bash
+   # Add to .gitignore
+   echo "*.conf" >> .gitignore
+   ```
+
+5. **Secure Deletion**: When removing old configurations:
+   ```bash
+   shred -u ./old-config.conf
+   ```
+
+## Troubleshooting
+
+### Creation Fails
+
+If peer creation fails:
+
+```bash
+# Try with verbose mode
+andasy wireguard create -o my-org -f ./config.conf --verbose
+
+# Check organization access
+andasy org list
+
+# Verify organization slug
+andasy org info -o my-org
+```
+
+### File Write Errors
+
+If you can't write the configuration file:
+
+```bash
+# Check directory exists
+mkdir -p $(dirname ./config.conf)
+
+# Check permissions
+ls -la $(dirname ./config.conf)
+
+# Try different location
+andasy wireguard create -o my-org -f ~/config.conf
+```
+
+### Configuration Invalid
+
+If the generated configuration doesn't work:
+
+```bash
+# Verify configuration syntax
+wg-quick strip ./config.conf
+
+# Check WireGuard installation
+wg --version
+
+# Try regenerating
+rm ./config.conf
+andasy wireguard create -o my-org -f ./config.conf
+```
+
+### Quota Exceeded
+
+If you've reached peer limits:
+
+```bash
+# List existing peers
+andasy wireguard list -o my-org -a
+
+# Remove unused peers
+andasy wireguard remove -o my-org -p "<unused-peer-key>"
+
+# Try creating again
+andasy wireguard create -o my-org -f ./config.conf
+```
+
+## Related Commands
+
+- [wireguard](/docs/services/wireguard)
+- [wireguard config](/docs/services/wireguard/config)
+- [wireguard list](/docs/services/wireguard/list)
+- [wireguard remove](/docs/services/wireguard/remove)
+
+
+---
+
+**Important:** Generated configurations contain private keys. Always store them securely, set restrictive permissions (chmod 600), distribute through encrypted channels, and never commit them to version control. We will display it only once so save it immediately to a secure location. Loss of this configuration will require removing the peer and creating a new one.
