@@ -54,13 +54,13 @@ andasy database postgres
 To create a PostgreSQL database service, run:
 
 ```bash
-andasy database postgres create -a <app-name> [flags]
+andasy database postgres create -a <db-app-name> [flags]
 ```
 
 You can also use the shorter alias:
 
 ```bash
-andasy db pg create -a <app-name> [flags]
+andasy db pg create -a <db-app-name> [flags]
 ```
 
 ### Available Flags
@@ -81,7 +81,7 @@ andasy db pg create -a <app-name> [flags]
 
 After creating a PostgreSQL service, you'll need connection information to connect your application. The database is accessible via:
 
-- **Host**: The database service's private network address (use the <app-name>.internal domain)
+- **Host**: The database service's private network address (use the `<db-app-name>.internal` domain)
 - **Port**: `5432` (standard PostgreSQL port)
 - **Database**: `postgres` (default database)
 - **User**: `postgres` (superuser)
@@ -96,12 +96,12 @@ Database connection details are displayed once after creating the service. Make 
 Your application can connect to the PostgreSQL service using standard PostgreSQL connection libraries. The connection string format is:
 
 ```
-postgresql://postgres:PASSWORD@<app-name>.internal:5432/postgres
+postgresql://postgres:PASSWORD@<db-app-name>.internal:5432/postgres
 ```
 
 Replace:
 - `PASSWORD` with your database password
-- `<app-name>` with your PostgreSQL service app name
+- `<db-app-name>` with your PostgreSQL service app name
 
 Since both your application and the database run on Andasy's private network, you can connect directly using the service's app name as the hostname.
 
