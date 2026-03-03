@@ -1,0 +1,150 @@
+---
+title: Regions
+description: Learn how to list, choose, and configure deployment regions in Andasy.
+---
+
+Regions represent the geographic locations where Andasy runs your applications.  
+Choosing the right region helps you optimize **latency**, **data locality**, and **availability** for your users.
+
+## Listing Available Regions
+
+To see which regions are currently available to your account, use the CLI:
+
+```bash
+andasy regions list
+```
+
+This prints the list of region codes (for example `KGL`, `CDG`, etc.) and their descriptions.  
+The `regions` command is the canonical, always-up-to-date source of truth for region codes.
+
+> You can also use the alias:
+>
+> ```bash
+> andasy region list
+> ```
+
+## How Region Selection Works
+
+When you deploy or manage applications, Andasy determines the region using a combination of:
+
+- **Configuration** in your `andasy.hcl` file
+- The `--region` **CLI flag**
+- The `ANDASY_REGION` **environment variable**
+- Region information returned by the API for an existing app
+
+### Default Behavior
+
+If no regions are configured for an app and none can be resolved from the API, some commands fall back to a default region:
+
+- The default region code is **`KGL`**.
+
+However, for deployments, if no region is configured anywhere, the CLI will return an error and ask you to configure a region first.
+
+## Configuring Regions in `andasy.hcl`
+
+Your primary way to configure regions is through the `app` block in `andasy.hcl`.
+
+### Primary Region
+
+Set a single primary region using `primary_region`:
+
+```hcl
+app_name = "my-app"
+
+app {
+  primary_region = "KGL"
+
+  env = {}
+  port = 8080
+
+  compute {
+    cpu       = 1
+    memory    = 256
+    cpu_kind  = "shared"
+  }
+
+  process {
+    name = "web"
+  }
+}
+```
+
+This tells Andasy to deploy your application primarily in the `KGL` region.
+
+### Multi-Region Deployments
+
+For multi-region deployments, you can provide an explicit list of regions:
+
+```hcl
+app_name = "my-multi-region-app"
+
+app {
+  primary_region = "KGL"
+  regions        = ["KGL", "CDG"]
+
+  env = {}
+  port = 8080
+
+  compute {
+    cpu       = 1
+    memory    = 256
+    cpu_kind  = "shared"
+  }
+
+  process {
+    name = "web"
+  }
+}
+```
+
+During deployment, the CLI uses `app.regions` if present; otherwise it falls back to `app.primary_region`.
+
+## Using `--region` and `ANDASY_REGION`
+
+In addition to configuration, you can control regions at runtime using:
+
+- The `--region` flag
+- The `ANDASY_REGION` environment variable
+
+These are treated as **overrides** and are combined with the configured regions when applicable.
+
+### Precedence
+
+When determining the override region:
+
+1. If `--region` is set, that value is used.
+2. Otherwise, if `ANDASY_REGION` is set, that value is used.
+3. Otherwise, the CLI falls back to config (`primary_region` / `regions`) or API-provided regions, and in some non-interactive cases to the default `KGL`.
+
+Region overrides are uppercased internally, so `kgl` and `KGL` are treated the same.
+
+### Examples
+
+Deploy using the `ANDASY_REGION` environment variable:
+
+```bash
+ANDASY_REGION=KGL andasy deploy
+```
+
+Deploy using the `--region` flag:
+
+```bash
+andasy deploy --region KGL
+```
+
+These commands instruct the CLI to use `KGL` as the target region, in addition to any regions configured in `andasy.hcl`.
+
+## Choosing the Right Region
+
+When selecting a region:
+
+- **Minimize latency**: Choose the region closest to your end users.
+- **Consider data residency**: Some workloads must stay within specific geographic or legal boundaries.
+- **Plan for redundancy**: For higher availability, consider using multiple regions where appropriate.
+
+You can always verify the list of supported regions and their descriptions with:
+
+```bash
+andasy regions list
+```
+

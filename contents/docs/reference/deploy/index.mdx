@@ -76,6 +76,44 @@ andasy deploy <dir> [flags]
 - `-m, --mode string`  
   Sets the deployment mode: `remote` (default) or `local`. See [Deployment Modes](#deployment-modes) above for details.
 
+- `--region string`  
+  Target Andasy region code (for example `kgl`). This can also be set via the `ANDASY_REGION` environment variable. See [Regions](/docs/reference/regions) for more details.
+
+## Region Behaviour
+
+When you run `andasy deploy`, the CLI determines which regions to deploy to using:
+
+1. The `app.regions` list from `andasy.hcl`, if present.
+2. Otherwise, the `app.primary_region` value.
+3. Any override specified via the `--region` flag or `ANDASY_REGION` environment variable.
+
+If an override is provided, it is combined with the configured regions before deployment (region codes are treated case-insensitively).
+
+If no region is configured in `andasy.hcl` and none can be determined from the API, `andasy deploy` will fail with an error instructing you to:
+
+- Set `primary_region` in your `andasy.hcl` file, or
+- Provide a region via `--region` or `ANDASY_REGION`.
+
+### Region Examples
+
+Deploy using the region configured in `andasy.hcl`:
+
+```bash
+andasy deploy
+```
+
+Deploy to a specific region using an environment variable:
+
+```bash
+ANDASY_REGION=kgl andasy deploy
+```
+
+Deploy to a specific region using the `--region` flag:
+
+```bash
+andasy deploy --region kgl
+```
+
 ## Examples
 
 ### Basic Remote Deployment

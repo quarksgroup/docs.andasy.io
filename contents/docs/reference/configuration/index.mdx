@@ -15,6 +15,7 @@ The configuration file is written in HCL format and defines the following main c
 - **Application block** - Contains the detailed deployment configuration:
   - **Environment variables** - Key-value pairs available to your application at runtime
   - **Port settings** - The port your application listens on for incoming connections
+  - **Region settings** - Which regions your application is deployed to
   - **Compute resources** - CPU and memory allocation for your application
   - **Process specifications** - How your application process is named and managed
   - **Storage requirements** - Persistent storage volumes attached to your application (optional)
@@ -25,7 +26,10 @@ The configuration file is written in HCL format and defines the following main c
 app_name = "app"
 
 app {
-  env = {}
+  primary_region = "kgl"
+  regions        = ["kgl", "fsn"]
+
+  env  = {}
   port = 80
   
   compute {
@@ -61,6 +65,8 @@ The `app` block contains the primary configuration for your application deployme
 |-----------|------|-------------|----------|
 | `env` | Map | Environment variables to be set for the application. These are key-value pairs that your application can access at runtime. For sensitive data, use [secrets](/docs/reference/secrets) instead. | No |
 | `port` | Integer | The port on which your application listens for incoming HTTP traffic. This must match the port your application code is configured to use. Andasy will route external traffic to this port. | Yes |
+| `primary_region` | String | The primary deployment region code for your application (for example `\"kgl\"`). This is used when no explicit `regions` list is provided. | Yes |
+| `regions` | List of strings | Optional list of region codes for multi-region deployments. If omitted, Andasy uses `primary_region` as the single deployment region. | No |
 
 ### Compute Configuration
 
