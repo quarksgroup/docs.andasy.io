@@ -27,6 +27,7 @@ export const ROUTES: EachRoute[] = [
       { title: "Apps", href: "/apps" },
       { title: "Setup", href: "/setup" },
       { title: "Deploy", href: "/deploy" },
+      { title: "Regions", href: "/regions" },
       { title: "Builder", href: "/builder" },
       { title: "Machines", href: "/machines" },
       { title: "Secrets", href: "/secrets" },

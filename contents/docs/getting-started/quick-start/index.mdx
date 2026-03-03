@@ -97,6 +97,14 @@ Andasy will:
 - Push the image to your private registry
 - Deploy the container and assign a URL
 
+By default, your app is deployed into a specific region. You can control this explicitly by setting a region, for example:
+
+```bash
+ANDASY_REGION=kgl andasy deploy
+```
+
+See the [Regions](/docs/reference/regions) guide for more details on how to list available regions and choose the right one for your app.
+
 Want to build locally?
 
 ```bash
