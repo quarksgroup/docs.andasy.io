@@ -1,10 +1,7 @@
 # syntax = docker/dockerfile:1
 
 # Adjust BUN_VERSION as desired
-ARG BUN_VERSION=1.1.45
-ARG NODE_VERSION=20.9.0
-
-FROM node:${NODE_VERSION}-slim AS node
+ARG BUN_VERSION=1.3.10
 
 FROM oven/bun:${BUN_VERSION}-slim AS base
 
@@ -13,40 +10,40 @@ LABEL fly_launch_runtime="Next.js"
 # Next.js app lives here
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV="production"
-
-
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3
+# Cache Apt metadata between BuildKit builds to avoid downloads each run.
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt \
+    apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3 && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install node modules
+# Install dependencies before copying the rest of the source to keep cache hits high.
 COPY bun.lockb package.json ./
-RUN bun install
+RUN --mount=type=cache,target=/root/.bun \
+    bun install
 
-# Copy application code
+# Build the Next.js app with the compiled and generated passes.
 COPY . .
-
-# Build application
 RUN bunx next build --experimental-build-mode compile
 RUN bunx next build --experimental-build-mode generate
 
-# Remove development dependencies
-RUN rm -rf node_modules && \
+# Reinstall only production modules to drop dev deps from the final layer.
+RUN rm -rf node_modules
+RUN --mount=type=cache,target=/root/.bun \
     bun install --ci
 
 
 # Final stage for app image
-FROM base
+FROM base AS runner
 
-# Copy built application
-COPY --from=build /app /app
-COPY --from=node /usr/local/bin/node /usr/local/bin/node
+ENV NODE_ENV=production
 
-# Start the server by default, this can be overwritten at runtime
+COPY --from=build /app/.next/standalone ./
+COPY --from=build /app/.next/static ./.next/static
+COPY --from=build /app/public ./public
+
 EXPOSE 3000
-CMD [ "bun", "run", "start" ]
+CMD [ "bun", "server.js" ]
