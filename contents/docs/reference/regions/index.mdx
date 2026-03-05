@@ -3,56 +3,63 @@ title: Regions
 description: Learn how to list, choose, and configure deployment regions in Andasy.
 ---
 
-Regions represent the geographic locations where Andasy runs your applications.  
-Choosing the right region helps you optimize **latency**, **data locality**, and **availability** for your users.
+Regions are the geographic locations where Andasy runs your application. Region selection affects latency, data residency, and availability.
 
-## Listing Available Regions
+## What Is a Region?
 
-To see which regions are currently available to your account, use the CLI:
+A region determines where machines are created for your app. You can configure one region or multiple regions to:
+
+- Reduce user latency
+- Meet data-residency requirements
+- Improve resilience through multi-region deployment
+
+Use `andasy regions list` as the source of truth for region codes available to your account.
+
+## List Available Regions
 
 ```bash
 andasy regions list
 ```
 
-This prints the list of region codes (for example `KGL`, `CDG`, etc.) and their descriptions.  
-The `regions` command is the canonical, always-up-to-date source of truth for region codes.
+This command prints region codes (for example, `kgl`, `cdg`) and descriptions.
 
-> You can also use the alias:
->
-> ```bash
-> andasy region list
-> ```
+Command aliases:
+- `regions`
+- `region`
 
-## How Region Selection Works
+## Region Resolution
 
-When you deploy or manage applications, Andasy determines the region using a combination of:
+Region values can come from:
+- `andasy.hcl` (`app.primary_region`, `app.regions`)
+- `--region` CLI flag
+- `ANDASY_REGION` environment variable
+- App region data returned by the API
 
-- **Configuration** in your `andasy.hcl` file
-- The `--region` **CLI flag**
-- The `ANDASY_REGION` **environment variable**
-- Region information returned by the API for an existing app
+Override precedence:
+1. `--region`
+2. `ANDASY_REGION`
+3. Config (`app.regions`, then `app.primary_region`)
+4. API-provided app regions (when applicable)
 
-### Default Behavior
+Region codes must be lowercase.
 
-If no regions are configured for an app and none can be resolved from the API, some commands fall back to a default region:
-
-- The default region code is **`KGL`**.
-
-However, for deployments, if no region is configured anywhere, the CLI will return an error and ask you to configure a region first.
+### Defaults and Deploy Behavior
+- Some non-deploy commands may fall back to the default region `kgl` when no value is resolved.
+- `andasy deploy` does not silently default if no region is resolved; it returns an error and asks you to configure one.
 
 ## Configuring Regions in `andasy.hcl`
 
-Your primary way to configure regions is through the `app` block in `andasy.hcl`.
+Configure regions in the `app` block.
 
 ### Primary Region
 
-Set a single primary region using `primary_region`:
+Set one region with `primary_region`:
 
 ```hcl
 app_name = "my-app"
 
 app {
-  primary_region = "KGL"
+  primary_region = "kgl"
 
   env = {}
   port = 8080
@@ -69,18 +76,16 @@ app {
 }
 ```
 
-This tells Andasy to deploy your application primarily in the `KGL` region.
-
 ### Multi-Region Deployments
 
-For multi-region deployments, you can provide an explicit list of regions:
+Set multiple deployment regions with `regions`:
 
 ```hcl
 app_name = "my-multi-region-app"
 
 app {
-  primary_region = "KGL"
-  regions        = ["KGL", "CDG"]
+  primary_region = "kgl"
+  regions        = ["kgl", "fsn"]
 
   env = {}
   port = 8080
@@ -97,54 +102,48 @@ app {
 }
 ```
 
-During deployment, the CLI uses `app.regions` if present; otherwise it falls back to `app.primary_region`.
+During deployment, Andasy uses `app.regions` when present; otherwise it falls back to `app.primary_region`.
 
 ## Using `--region` and `ANDASY_REGION`
 
-In addition to configuration, you can control regions at runtime using:
-
-- The `--region` flag
-- The `ANDASY_REGION` environment variable
-
-These are treated as **overrides** and are combined with the configured regions when applicable.
-
-### Precedence
-
-When determining the override region:
-
-1. If `--region` is set, that value is used.
-2. Otherwise, if `ANDASY_REGION` is set, that value is used.
-3. Otherwise, the CLI falls back to config (`primary_region` / `regions`) or API-provided regions, and in some non-interactive cases to the default `KGL`.
-
-Region overrides are uppercased internally, so `kgl` and `KGL` are treated the same.
+Use runtime overrides when needed:
+- `--region <code>`
+- `ANDASY_REGION=<code>`
 
 ### Examples
 
-Deploy using the `ANDASY_REGION` environment variable:
+Deploy with environment variable:
 
 ```bash
-ANDASY_REGION=KGL andasy deploy
+ANDASY_REGION=kgl andasy deploy
 ```
 
-Deploy using the `--region` flag:
+Deploy with CLI flag:
 
 ```bash
-andasy deploy --region KGL
+andasy deploy --region kgl
 ```
-
-These commands instruct the CLI to use `KGL` as the target region, in addition to any regions configured in `andasy.hcl`.
 
 ## Choosing the Right Region
 
-When selecting a region:
+- Choose regions close to users for lower latency.
+- Keep legal or compliance boundaries in mind.
+- Use multiple regions only when you need additional resiliency.
 
-- **Minimize latency**: Choose the region closest to your end users.
-- **Consider data residency**: Some workloads must stay within specific geographic or legal boundaries.
-- **Plan for redundancy**: For higher availability, consider using multiple regions where appropriate.
+### Volumes and Region Changes
 
-You can always verify the list of supported regions and their descriptions with:
+If a machine has an attached [volume](/docs/services/volumes), that machine is pinned to the node where the volume exists. Because of this, you cannot move that machine to another region. In practice, workloads that depend on attached volumes are constrained to the region where those volumes were created.
 
-```bash
-andasy regions list
-```
+## Flags
 
+| Flag | Description |
+|------|-------------|
+| `-h`, `--help` | Show help for the command |
+| `-j`, `--json` | Output result in JSON format |
+| `-v`, `--verbose` | Verbose output |
+
+## Related Commands
+
+- [`andasy deploy`](/docs/reference/deploy) - Deploy applications using region configuration
+- [Configuration file](/docs/reference/configuration) - Set `primary_region` and `regions` in `andasy.hcl`
+- [`andasy apps`](/docs/reference/apps) - Manage applications

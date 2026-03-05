@@ -3,40 +3,31 @@ title: Metrics and Monitoring
 description: Learn how to monitor your applications' performance and health.
 ---
 
-The Andasy platform includes a fully-managed metrics solution to help you monitor your applications' performance and health. **Metrics** are numerical measurements collected over time that describe your application's behavior and performance, such as CPU usage, memory consumption, request rates, and error counts.
+Andasy provides a fully managed metrics service for monitoring application performance and health.
 
-Unlike logs (which are text messages), metrics are structured data points that can be:
+Metrics are numeric time-series values (for example CPU, memory, request rate, error rate). Unlike logs, metrics are designed to be:
 
-- **Aggregated** - Combined across multiple machines or time periods
-- **Graphed** - Visualized as charts and dashboards
-- **Alerted on** - Used to trigger alerts when thresholds are exceeded
-- **Queried** - Analyzed using query languages like PromQL
+- Aggregated across machines and time ranges
+- Visualized in dashboards
+- Used for threshold-based alerting
+- Queried with Prometheus-compatible APIs
 
-Andasy automatically collects metrics from every application you deploy, so you can monitor performance without additional instrumentation.
+Andasy automatically collects metrics from deployed applications.
 
-## Metrics Components
+## Components
 
-The Andasy metrics solution includes:
+The metrics stack includes:
 
-- **Metrics viewer** - A web-based interface at [metrics.andasy.io](https://metrics.andasy.io) for viewing and querying metrics
-- **Prometheus-compatible storage** - Managed time-series database that stores your metrics
-- **Automatic collection** - Metrics are automatically sent from every Andasy app you deploy
-- **Standard labels** - All metrics include labels like `app_name`, `org_id`, and `machine_id` for filtering and grouping
+- Metrics UI at [metrics.andasy.io](https://metrics.andasy.io)
+- Prometheus-compatible time-series storage
+- Automatic metric ingestion from Andasy apps
+- Standard labels on published metrics (`app_name`, `org_id`, `machine_id`)
 
 ## Prometheus on Andasy.io
 
-**Prometheus** is a popular open-source monitoring system used to store and query metrics efficiently. Andasy provides a fully-managed Prometheus-compatible service, so you get the power of Prometheus without managing the infrastructure yourself.
+Andasy exposes a Prometheus-compatible querying surface, so you can use familiar PromQL workflows without managing your own Prometheus servers.
 
-### What is Prometheus?
-
-[Prometheus](https://prometheus.io/) is a time-series database designed for monitoring. It:
-
-- Stores metrics as time-series data (values over time)
-- Provides a powerful query language (PromQL) for analyzing metrics
-- Offers a stable HTTP API for querying and integration
-- Is widely supported by monitoring tools and dashboards
-
-**Prometheus on Andasy.io** is a fully-managed service that [supports](https://docs.victoriametrics.com/#prometheus-querying-api-usage) most common Prometheus querying API endpoints:
+Supported API endpoints include:
 - [`/api/v1/query`](https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries)
 - [`/api/v1/query_range`](https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries)
 - [`/api/v1/series`](https://prometheus.io/docs/prometheus/latest/querying/api/#finding-series-by-label-matchers)
@@ -45,64 +36,54 @@ The Andasy metrics solution includes:
 - [`/api/v1/status/tsdb`](https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-stats)
 - [`/federate`](https://prometheus.io/docs/prometheus/latest/federation/)
 
-Note that [remote read](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_read) (`/api/v1/read`) and [remote storage integration](https://prometheus.io/docs/prometheus/latest/storage/#remote-storage-integrations)
-are not supported.
+Not supported:
+- [Remote read (`/api/v1/read`)](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_read)
+- [Remote storage integrations](https://prometheus.io/docs/prometheus/latest/storage/#remote-storage-integrations)
 
-### MetricsQL
+## Query Language
 
-Prometheus queries are typically based on the [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) query language.
-Prometheus on Andasy.io queries use [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/).
+Queries use [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/).
 
+## Query Endpoint
 
-### Querying Metrics
-
-Queries can be sent to the following endpoint:
+Send queries to:
 
 ```
 https://metrics.andasy.io/
 ```
 
-**Authentication**: You'll need to authenticate using an Access Token sent in the [standard](https://www.rfc-editor.org/rfc/rfc6750.html) Bearer Token format. Include it as an HTTP header: `Authorization: Bearer <TOKEN>`. You can only query metrics for applications in your organizations.
+Authentication is required with a Bearer token:
+- Header format: `Authorization: Bearer <TOKEN>`
+- Get a token with `andasy auth token`
+- Access is limited to applications in your organizations
 
-**Getting an Access Token**: Use `andasy auth token` to get your access token.
-
-#### Manually
-
-**Get an access token**
+### Quick Start
 
 ```bash
 TOKEN=$(andasy auth token)
 ```
 
-**Test it out!**
-
 ```bash
 curl https://metrics.andasy.io/api/v1/query \
   --data-urlencode 'query=sum(increase(cpu_seconds_total)) by (app_name, org_id)' \
-  -H "Authorization: $TOKEN"
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ### External or self-hosted Grafana
 
-You can also configure your Prometheus endpoint with an existing Grafana installation like this:
+To use an existing Grafana instance:
 
 1. [Add](https://grafana.com/docs/grafana/latest/datasources/add-a-data-source/) a [Prometheus data source](https://grafana.com/docs/grafana/latest/datasources/prometheus/) (Settings -> Data Sources -> Add data source -> Prometheus)
-2. Fill the form with the following:
-- HTTP -> URL: `https://metrics.andasy.io`
-- Custom HTTP Headers -> + Add Header:
-   - Header: `Authorization`, Value: `Bearer <token>`
+2. Set `HTTP -> URL` to `https://metrics.andasy.io`
+3. Add a custom HTTP header: `Authorization: Bearer <token>`
 
-You're all set.
+## Standard Labels
 
-### Standard Labels
+All published metrics include labels for filtering and grouping:
 
-All published metrics include the following labels, which you can use to filter and group metrics:
-
-- **`app_name`** - The name of your application
-- **`org_id`** - Your organization ID (useful for multi-org accounts)
-- **`machine_id`** - The ID of the specific machine (useful for comparing performance across machines)
-
-These labels allow you to query metrics for specific applications, compare performance across machines, or aggregate metrics across your entire organization.
+- `app_name`: application name
+- `org_id`: organization identifier
+- `machine_id`: machine identifier
 
 ## Common Use Cases
 
