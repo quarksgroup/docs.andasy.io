@@ -1,0 +1,86 @@
+---
+title: Vertical Scaling (CPU & Memory)
+description: How to vertically scale an app's CPU and memory using the Andasy CLI.
+---
+
+Use the Andasy CLI to change an application's CPU and memory allocations and apply those changes to the deployed version immediately.
+
+## What is vertical scaling?
+
+Vertical scaling changes the compute resources available to a single application instance — typically increasing or decreasing CPU cores and memory (RAM). This is useful when an app needs more CPU for compute-heavy tasks or more memory for in-memory caches.
+
+## CLI overview
+
+The `scale` command is implemented in the CLI and accepts CPU and memory flags. See the implementation in the CLI for the authoritative source of flags and behaviour.
+
+### Usage
+
+```bash
+andasy scale [flags]
+andasy scale show -a <app>
+```
+
+### Flags
+
+- `--app, -a` : Target Andasy app name
+- `--cpu` : CPU count (eg: 1, 2, 4)
+- `--memory, -m` : Memory in MiB
+- `--json, -j` : JSON output
+
+These flags are defined in the CLI.
+
+## Examples
+
+Scale an app to 512 MiB memory:
+
+```bash
+andasy scale --memory 512 -a app-name
+```
+
+Typical interactive output when scaling (CLI progress and health checks):
+
+```
+Scaling app app-name... -> Waiting for machine application to be healthy (machine-id) with new resource allocation
+• Start VM: Completed
+• Machine application is healthy
+
+Successfully scaled app app-name and deployed with new resource allocation
+```
+
+Show current scale for an app:
+
+```bash
+andasy scale show -a app-name
+
+# Output
+APP           CPU   MEMORY     CPU KIND   CREATED AT   UPDATED AT
+app-name   1     512 MiB    shared     2026-06-15   2026-06-15
+```
+
+## Implementation notes
+
+- The `scale` command performs a patch request to the API.
+- The command streams deployment status and waits for machine health before completing.
+
+## How it works
+
+When you run `andasyctl scale` the CLI sends a PATCH request to the platform API which persists the new compute values (CPU and memory) server-side. The CLI and API intentionally do not modify your local `config.hcl`; scaling creates a server-side intent that decouples operational changes from repository configuration. This allows teams to adjust production capacity without committing HCL changes or interfering with CI-driven deploys.
+
+At the next `deploy` or `restart`, the deploy flow checks for a saved scale intent for the app and, if present, merges those compute values into the server-side application config used for the deployment. The VM recreate path uses those merged compute values when provisioning the machine. If the deploy succeeds the saved scale is associated to application service config; if the deploy fails the saved values are retained so the change can be retried.
+
+
+## Editing `andasy.hcl` vs using `andasyctl scale`
+
+If there is no saved scale intent for an application, the deploy flow will use the compute values defined in the app's `andasy.hcl`, so you can change CPU and memory by editing that file and performing a normal deploy.
+
+Once an `andasyctl scale` request has been performed for an application and a saved scale intent exists, the saved intent takes precedence. During subsequent `deploy` or `restart` operations the saved values will override the compute fields in `andasy.hcl`, so manual edits to `andasy.hcl` will not take effect while a saved scale intent exists for the app.
+
+Recommendation: use `andasyctl scale` for ad-hoc operational scaling so intent is recorded and validated server-side. Edit `andasy.hcl` when you intend the change to be a committed configuration change in source control.
+
+### Key guarantees for users
+
+- `No local andasy.hcl change` — scale only records server-side intent.
+- `No commit required` — scale does not require a commit to version control unless you need to change the configuration file too.
+---
+
+**Important:** The `scale` command does not change the local `andasy.hcl` file. It only update or create application compute values and associate those value to app config on andasy platform. If you want to persist the change in your local repository edit your andasy.hcl file. But every new deployment automatically uses the latest saved scale values from the platform, so you can scale without committing changes to your repository.
