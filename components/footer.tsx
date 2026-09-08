@@ -12,9 +12,9 @@ export function Footer() {
             Powered by{" "}
             <Link
               className="px-1 underline underline-offset-2"
-              href="https://quarksgroup.rw"
+              href="https://andasy.io"
             >
-              Quarks Group
+              Andasy IO LTD
             </Link>
           </p>
         </div>
