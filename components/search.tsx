@@ -1,5 +1,7 @@
 "use client";
 
+import { docsHref } from "@/lib/routes-config";
+
 import { CommandIcon, FileIcon, SearchIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -92,7 +94,7 @@ export default function Search() {
                         "dark:hover:bg-stone-900 hover:bg-stone-100 w-full px-3 rounded-sm text-sm flex items-center gap-2.5",
                         paddingClass
                       )}
-                      href={`/docs${item.href}`}
+                      href={docsHref(item.href)}
                     >
                       <div
                         className={cn(

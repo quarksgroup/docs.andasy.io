@@ -7,6 +7,12 @@ export type EachRoute = {
   items?: EachRoute[];
 };
 
+export function docsHref(href: string) {
+  return href === "/app-guides" || href.startsWith("/app-guides/")
+    ? href
+    : `/docs${href}`;
+}
+
 export const ROUTES: EachRoute[] = [
   {
     title: "Getting Started",
@@ -77,6 +83,17 @@ export const ROUTES: EachRoute[] = [
         items: [
           { title: "Postgres", href: "/postgres" },
         ],
+      },
+    ],
+  },
+  {
+    title: "App Guides",
+    href: "/app-guides",
+    noLink: true,
+    items: [
+      { 
+        title: "Redis / KeyDB",
+         href: "/redis-keydb",
       },
     ],
   },

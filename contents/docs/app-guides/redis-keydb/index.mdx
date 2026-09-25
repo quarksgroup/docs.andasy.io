@@ -1,0 +1,143 @@
+---
+title: Deploy Redis-compatible KeyDB
+description: Deploy redis-key-db to Andasy with password authentication, persistent storage, and private connections.
+---
+
+KeyDB is a multithreaded, Redis-compatible server. This guide deploys the [redis-key-db example](https://github.com/quarksgroup/redis-key-db) to Andasy with password authentication and a persistent volume.
+
+## Prerequisites
+
+- An [Andasy account](https://andasy.io/auth/signup) and the [Andasy CLI](/docs/getting-started/quick-start).
+- Git to clone the repository.
+- `redis-cli` or `keydb-cli` to verify the deployment.
+
+Log in and clone the example:
+
+```bash
+andasy auth login
+git clone https://github.com/quarksgroup/redis-key-db.git
+cd redis-key-db
+```
+
+## Create the application
+
+Register an application in your Andasy organization:
+
+```bash
+andasy apps create
+```
+
+Use the application name you select in `andasy.hcl` and in every command below. The examples use `redis-key-db`; choose another name if it is unavailable.
+
+This repository already includes a Dockerfile and `andasy.hcl`, so you can use them directly without generating replacements with `andasy setup`.
+
+## Configure the deployment
+
+Review `andasy.hcl`:
+
+```hcl
+app_name = "redis-key-db"
+
+app {
+  env = {}
+  port = 6379
+  primary_region = "kgl"
+
+  compute {
+    cpu = 1
+    memory = 256
+    cpu_kind = "shared"
+  }
+
+  process {
+    name = "redis-key-db"
+  }
+
+  storage {
+    name = "keydb_server"
+    destination = "/data"
+  }
+}
+```
+
+Set `app_name` to your registered application name. This example starts in Kigali (`kgl`); use `andasy regions list` to check available regions and update `primary_region` before provisioning storage. The 256 MB allocation is a starting point for a small workload; allow memory for both your dataset and KeyDB's runtime overhead.
+
+The Dockerfile starts `/andasy/start_keydb.sh`, which loads `keydb.conf` and uses `KEYDB_PASSWORD` for client authentication and peer replication. KeyDB listens on port `6379` and writes its data under `/data`.
+
+## Set the password
+
+Generate a strong password, save it in your password manager, and set it as an Andasy secret. For example, `openssl rand -hex 32` generates a password without spaces or shell wildcard characters, which suits the current startup script.
+
+```bash
+andasy secrets set KEYDB_PASSWORD=REPLACE_WITH_YOUR_GENERATED_PASSWORD -a redis-key-db
+```
+
+Replace the placeholder before running the command. Keep the password out of `andasy.hcl` and version control. Set this secret before the first deployment; the startup script requires it.
+
+## Create persistent storage
+
+Create a volume with the same name as the `storage` block:
+
+```bash
+andasy volumes create keydb_server -a redis-key-db
+andasy volumes list -a redis-key-db
+```
+
+Run these commands from the repository directory so the CLI can read your configuration. Check `andasy volumes create --help` for your CLI version's sizing options and units before choosing a custom size.
+
+The volume is mounted at `/data`. The supplied `keydb.conf` enables periodic RDB snapshots and disables append-only persistence (`appendonly no`). A volume preserves saved snapshots across restarts, but writes since the last snapshot can still be lost. Review the persistence settings and [volume backups](/docs/services/snapshots) for workloads that need stronger durability.
+
+## Deploy and inspect logs
+
+```bash
+andasy deploy
+andasy logs -a redis-key-db
+```
+
+Andasy builds the supplied Dockerfile and deploys the container with the secret and storage configuration. Check the logs for startup errors before connecting.
+
+## Connect and verify
+
+Forward a local port to KeyDB through Andasy's [private proxy](/docs/services/proxy):
+
+```bash
+andasy proxy 16379:6379 -a redis-key-db -b 127.0.0.1
+```
+
+Keep that command running. In another terminal, use your generated password when prompted:
+
+```bash
+redis-cli -h 127.0.0.1 -p 16379 --askpass PING
+```
+
+A successful connection returns `PONG`. You can substitute `keydb-cli` for `redis-cli`.
+
+For an application running on the same Andasy organization's private network, configure your Redis client with port `6379`, your password, and the private hostname `global.redis-key-db.internal`. Replace `redis-key-db` with your application name. This is the same DNS naming convention used by the repository's peer discovery script; verify that it resolves from the client machine.
+
+For clients that accept a connection URL:
+
+```text
+redis://:YOUR_PASSWORD@global.redis-key-db.internal:6379/0
+```
+
+Store the connection URL as a secret on the consuming application. Percent-encode the password if it contains URL-reserved characters. Private `.internal` names require access to Andasy's private network; use the proxy for local development. KeyDB speaks the Redis TCP protocol, so an application HTTPS URL is not a Redis connection endpoint.
+
+## Replication and operational limits
+
+The configuration enables `active-replica` and `multi-master`. This walkthrough starts with a single region. The default startup command runs peer discovery once at boot; it does not start the included periodic discovery helper. Adding machines or regions therefore requires checking peer discovery, replication, and storage for each instance.
+
+Do not assume that adding a region alone creates a healthy replicated deployment. Verify peers with `INFO replication`, and plan how existing machines discover newly added peers. Multi-master replication is not strongly consistent; assess conflict handling before using it for authoritative data. Redis Pub/Sub is transient messaging, not a durable queue.
+
+## Troubleshooting
+
+- **Authentication errors:** Check that `KEYDB_PASSWORD` is set on the correct application and matches the client password. Redeploy after changing the secret.
+- **Connection refused:** Check `andasy logs`, confirm port `6379`, and keep the proxy running while testing locally.
+- **Missing data after restart:** Confirm the `keydb_server` volume is attached at `/data` and inspect the snapshot settings in `keydb.conf`.
+- **Startup or peer discovery errors:** Inspect logs for failed `sysctl` commands or DNS lookup failures. The startup script assumes Andasy's network environment, including `ANDASY_APP`, the `andasy-local-pn6` hosts entry, and the DNS resolver at `fdc7::3`.
+
+## Related documentation
+
+- [Andasy configuration](/docs/reference/configuration)
+- [Secrets](/docs/reference/secrets)
+- [Persistent volumes](/docs/services/volumes)
+- [Regions](/docs/reference/regions)
