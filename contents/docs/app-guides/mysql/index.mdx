@@ -1,0 +1,162 @@
+---
+title: Deploy MySQL
+description: Run MySQL on Andasy as an application with a persistent volume and private network access.
+---
+
+MySQL is not a managed Andasy database engine. You deploy it as a regular application with a volume, then connect from other apps on the private network. For a managed relational database, use [PostgreSQL](/docs/services/databases/postgres).
+
+## Prerequisites
+
+- An [Andasy](https://andasy.io) account
+- The [Andasy CLI](https://github.com/quarksgroup/andasy-cli)
+
+Log in:
+
+```bash
+andasy auth login
+```
+
+## Create the application
+
+Create the application:
+
+```bash
+andasy apps create
+```
+
+Use the same name in `andasy.hcl` and in later commands. Replace `<app-name>` with that name throughout this guide.
+
+In your project directory, add a `Dockerfile` and an `andasy.hcl` file (shown below). You can also run [`andasy setup`](/docs/reference/setup) and then replace the generated files with this configuration.
+
+## Dockerfile
+
+The MySQL version is the Docker image tag. The default below is `8.0`. Change `MYSQL_VERSION` to another official tag (`5.7`, `8.4`, `9.0`, or a pin such as `8.0.40`) before the first deploy.
+
+<Note type="warning" title="Do not change major versions on an existing volume">
+Pick the version before the first deploy. Changing major versions on the same `mysql_data` volume can fail. Use a new volume if you need another major version.
+</Note>
+
+```dockerfile
+ARG MYSQL_VERSION=8.0
+FROM mysql:${MYSQL_VERSION}
+
+CMD ["mysqld", "--bind-address=*", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--innodb-buffer-pool-size=128M"]
+```
+
+`--bind-address=*` lets other Andasy apps and `andasy proxy` connect. Do not put passwords in the Dockerfile.
+
+## Configuration
+
+Set `primary_region` in `andasy.hcl` to `kgl` (Kigali) or `fsn` (Falkenstein, Germany). Use the same region as the application that will connect to this database. See [Regions](/docs/reference/regions).
+
+`compute.memory` starts at 512 MiB. That is a starting point, not a requirement. Edit it if you need more or less.
+
+```hcl
+app_name = "<app-name>"
+
+app {
+  primary_region = "kgl"
+
+  env = {
+    MYSQL_DATABASE = "app"
+  }
+
+  port = 3306
+
+  compute {
+    cpu      = 1
+    memory   = 512
+    cpu_kind = "shared"
+  }
+
+  process {
+    name = "<app-name>"
+  }
+
+  storage {
+    name        = "mysql_data"
+    destination = "/var/lib/mysql"
+  }
+}
+```
+
+## Create a volume
+
+```bash
+andasy volumes create -a <app-name> -s 1 mysql_data
+```
+
+The volume name must match `storage.name`. The mount point is `/var/lib/mysql`. Attach this volume only to the MySQL application. Your application does not mount it. See [Persistent storage volumes](/docs/services/volumes).
+
+## Deploy, set secrets, restart
+
+`andasy secret set` requires a release. Deploy once first:
+
+```bash
+andasy deploy
+```
+
+MySQL may not stay up yet. Logs may show that `MYSQL_ROOT_PASSWORD` is missing. Andasy may warn that `https://<app-name>.andasy.dev` is not available. That is expected: MySQL is not an HTTP service.
+
+Then set credentials and restart:
+
+```bash
+andasy secret set MYSQL_ROOT_PASSWORD='your-root-password' MYSQL_USER=app MYSQL_PASSWORD='your-app-password' -a <app-name>
+andasy apps restart -a <app-name>
+andasy logs -a <app-name>
+```
+
+Wait until logs show `ready for connections`. `MYSQL_DATABASE` comes from `andasy.hcl` (default `app`). See [Secrets](/docs/reference/secrets).
+
+## Connect
+
+`port = 3306` is required in `andasy.hcl`, but MySQL uses the MySQL protocol. Do not use `https://<app-name>.andasy.dev` as the database host.
+
+### From your laptop
+
+```bash
+andasy proxy 3306:3306 -a <app-name>
+```
+
+In another terminal:
+
+```bash
+mysql -h 127.0.0.1 -P 3306 -u app -p
+```
+
+See [Proxy](/docs/services/proxy).
+
+### From another Andasy application
+
+Use the private hostname. That application does not attach `mysql_data`.
+
+| Field | Value |
+| --- | --- |
+| Host | `<app-name>.internal` |
+| Port | `3306` |
+| Database | `app` (or your `MYSQL_DATABASE`) |
+| User | `app` (or your `MYSQL_USER`) |
+| Password | the secret you set |
+
+```
+mysql://app:PASSWORD@<app-name>.internal:3306/app
+```
+
+Replace `<app-name>` with your `app_name`. Both apps must be in the same organization and region. Store the password as a secret on the connecting application.
+
+### Import a dump
+
+```bash
+andasy proxy 3306:3306 -a <app-name>
+mysql -h 127.0.0.1 -P 3306 -u app -p app < your-dump.sql
+```
+
+## Related Documentation
+
+- [Configuration](/docs/reference/configuration)
+- [Secrets](/docs/reference/secrets)
+- [Persistent volumes](/docs/services/volumes)
+- [Proxy](/docs/services/proxy)
+- [Regions](/docs/reference/regions)
+
+A complete sample lives in [andasy-mysql-example](https://github.com/quarksgroup/andasy-mysql-example).
