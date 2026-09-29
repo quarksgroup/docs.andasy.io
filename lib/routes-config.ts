@@ -81,6 +81,14 @@ export const ROUTES: EachRoute[] = [
     ],
   },
   {
+    title: "App Guides",
+    href: "/app-guides",
+    noLink: true,
+    items: [
+      { title: "MySQL", href: "/mysql" },
+    ],
+  },
+  {
     title: "workflows",
     href: "/workflows",
     noLink: true,
