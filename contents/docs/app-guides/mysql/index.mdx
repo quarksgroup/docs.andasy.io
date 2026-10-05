@@ -33,9 +33,7 @@ git clone https://github.com/quarksgroup/andasy-mysql-example.git
 cd andasy-mysql-example
 ```
 
-Set `app_name` in `andasy.hcl` to `<app-name>`. The repository already includes a `Dockerfile` and `andasy.hcl`. Do not rewrite the Dockerfile.
-
-If you are not cloning, use this `andasy.hcl` instead. Set `image` to the MySQL version you need (`8.0`, `5.7`, `8.4`, `9.0`, or a pin such as `8.0.40`).
+Set `app_name` in `andasy.hcl` to `<app-name>`. Set `image` to the MySQL version you need (`8.0`, `5.7`, `8.4`, `9.0`, or a pin such as `8.0.40`).
 
 <Note type="warning" title="Do not change major versions on an existing volume">
 Pick the version before the first deploy. Changing major versions on the same `mysql_data` volume can fail. Use a new volume if you need another major version.
