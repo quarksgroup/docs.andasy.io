@@ -26,42 +26,35 @@ andasy apps create
 
 Use the same name in `andasy.hcl` and in later commands. Replace `<app-name>` with that name throughout this guide.
 
-In your project directory, add a `Dockerfile` and an `andasy.hcl` file (shown below). You can also run [`andasy setup`](/docs/reference/setup) and then replace the generated files with this configuration.
+Clone the example:
 
-## Dockerfile
+```bash
+git clone https://github.com/quarksgroup/andasy-mysql-example.git
+cd andasy-mysql-example
+```
 
-The MySQL version is the Docker image tag. The default below is `8.0`. Change `MYSQL_VERSION` to another official tag (`5.7`, `8.4`, `9.0`, or a pin such as `8.0.40`) before the first deploy.
+Set `app_name` in `andasy.hcl` to `<app-name>`. The repository already includes a `Dockerfile` and `andasy.hcl`. Do not rewrite the Dockerfile.
+
+If you are not cloning, use this `andasy.hcl` instead. Set `image` to the MySQL version you need (`8.0`, `5.7`, `8.4`, `9.0`, or a pin such as `8.0.40`).
 
 <Note type="warning" title="Do not change major versions on an existing volume">
 Pick the version before the first deploy. Changing major versions on the same `mysql_data` volume can fail. Use a new volume if you need another major version.
 </Note>
 
-```dockerfile
-ARG MYSQL_VERSION=8.0
-FROM mysql:${MYSQL_VERSION}
+Set `primary_region` to `kgl` (Kigali) or `fsn` (Falkenstein, Germany). Use the same region as the application that will connect to this database. See [Regions](/docs/reference/regions).
 
-CMD ["mysqld", "--bind-address=*", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--innodb-buffer-pool-size=128M"]
-```
-
-`--bind-address=*` lets other Andasy apps and `andasy proxy` connect. Do not put passwords in the Dockerfile.
-
-## Configuration
-
-Set `primary_region` in `andasy.hcl` to `kgl` (Kigali) or `fsn` (Falkenstein, Germany). Use the same region as the application that will connect to this database. See [Regions](/docs/reference/regions).
-
-`compute.memory` starts at 512 MiB. That is a starting point, not a requirement. Edit it if you need more or less.
+`compute.memory` starts at 512 MiB. That is a starting point, not a requirement.
 
 ```hcl
 app_name = "<app-name>"
 
 app {
   primary_region = "kgl"
+  image          = "docker.io/library/mysql:8.0"
 
   env = {
     MYSQL_DATABASE = "app"
   }
-
-  port = 3306
 
   compute {
     cpu      = 1
@@ -110,7 +103,7 @@ Wait until logs show `ready for connections`. `MYSQL_DATABASE` comes from `andas
 
 ## Connect
 
-`port = 3306` is required in `andasy.hcl`, but MySQL uses the MySQL protocol. Do not use `https://<app-name>.andasy.dev` as the database host.
+MySQL listens on port `3306` inside the container. Do not use `https://<app-name>.andasy.dev` as the database host.
 
 ### From your laptop
 
