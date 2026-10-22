@@ -1,0 +1,55 @@
+---
+title: Billing and credits
+description: Understand usage charges, wallet balances, monthly plan credits, and unpaid invoices.
+---
+
+The new billing model is being introduced by organization. This guide applies when your Billing page shows separate **Purchased funds**, **Plan credits**, and **Promotional credits**. Existing paid plan periods are honored through their renewal before migration.
+
+## What is charged
+
+All organizations use the same resource prices, whether they choose PAYG or a monthly plan. Your invoice shows the applicable region, rate, quantity, and unit.
+
+| Resource | Quantity |
+| --- | --- |
+| CPU | CPU time consumed by the guest, measured in CPU-hours |
+| Memory | Configured memory while the machine is running, measured in GiB-hours |
+| Persistent storage | Provisioned volume size over time, measured in GiB-months |
+| Bandwidth | Measured and displayed; included at no charge |
+
+A GiB is 1,073,741,824 bytes. Storage uses **730 hours per GiB-month**. A 10 GiB volume provisioned for 365 hours uses 5 GiB-months. Detached volumes continue to incur storage charges. Stopped machines do not incur CPU or memory charges.
+
+Invoices cover UTC calendar months. The start is included and the end is excluded. A calendar month has 672 to 744 hours; February in a leap year has 696. The pricing calculator is an estimate based on the running hours and CPU utilization you choose.
+
+## Your balances
+
+- **Purchased funds** come from wallet top-ups. They pay for usage and monthly plan renewals and never expire.
+- **Plan credits** come from monthly spending-credit purchases. They pay for usage, never expire, and remain available after cancellation. They cannot pay for another plan renewal.
+- **Promotional credits** follow their offer's expiry date. Eligible promotions are used first, earliest expiry first, followed by plan credits and purchased funds.
+
+Available balances already account for usage reserved hourly. Check the calculation timestamp: an unavailable or stale data warning means the displayed figure may not reflect recent usage. An estimate becomes an issued invoice after the month closes; consolidation does not charge reserved usage again.
+
+Promotions are applied according to when usage occurred. Usage already covered by a promotion does not become payable again because that promotion expires before the invoice is issued.
+
+## Monthly plans
+
+Plans purchase a monthly amount of usage credit. For example, a $20 renewal moves exactly $20 from purchased funds to plan credits. Advertised machine and volume sizes are usage examples. Platform capacity limits and the plan's other benefits remain separate.
+
+The renewal date follows the original subscription anniversary. January 31 renews on February 28 (29 in a leap year), then March 31. Plan changes and cancellation take effect at the next renewal. Unused credits roll over.
+
+Outstanding usage is settled before renewal funds are transferred. If there are insufficient purchased funds, your organization falls back to PAYG and retains its unused credits. A failed renewal does not create unpaid membership debt. Initial activation requires the full plan price.
+
+## Paying
+
+Top up your wallet from Billing through Pesapal, or pay from an issued invoice. The payment must be verified before funds become available. If confirmation is pending, use the existing checkout or refresh its status. Reloading or retrying recovers the original payment request.
+
+Invoices show their original total, credits applied, credit notes, and the remaining amount due. Corrections use linked credit notes; the original issued document remains available. Provider reversals are recorded separately and can reopen usage debt previously covered by the reversed funds.
+
+## Unpaid usage invoices
+
+You have **30 days after an unpaid usage invoice is issued** to pay it. During that payment window, you can use the platform normally, including deployments, workload changes, SSH and tunnels. Payment reminders do not restrict access.
+
+If the invoice remains unpaid after 30 days, workload changes are restricted, shell and tunnel access is revoked, and workloads are suspended. Billing, payment, read-only inspection and exports remain available through the API and dashboard. The **30-day data-retention period starts after workload stops are confirmed**. Storage retained during billing suspension is free. Notices are sent at delinquency, days 7, 14, 21 and 28, suspension, and seven days before deletion. Delayed delivery of the final warning extends the time before deletion.
+
+Payment before deletion is claimed cancels enforcement and restores only workloads that billing stopped. Workloads that you had already stopped remain stopped. Contact support to dispute an invoice or request an administrative review. Workload-data deletion preserves invoices and financial records.
+
+If payment arrives after deletion has been claimed, remaining deletion work is held for review. Support must verify which data survives before recovering workloads. A payment cannot restore data that has already been deleted.
