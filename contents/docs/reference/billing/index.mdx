@@ -53,3 +53,9 @@ If the invoice remains unpaid after 30 days, workload changes are restricted, sh
 Payment before deletion is claimed cancels enforcement and restores only workloads that billing stopped. Workloads that you had already stopped remain stopped. Contact support to dispute an invoice or request an administrative review. Workload-data deletion preserves invoices and financial records.
 
 If payment arrives after deletion has been claimed, remaining deletion work is held for review. Support must verify which data survives before recovering workloads. A payment cannot restore data that has already been deleted.
+
+## Temporary pause on billing-driven data deletion
+
+Automatic permanent deletion for unpaid billing is currently paused while retention notices and recovery arrangements are reviewed. Payment deadlines, workload suspension, payment recovery and free storage during billing suspension still apply. The normal 30-day post-suspension retention deadline does not trigger deletion during this pause. Deletion will not resume without the required advance notices.
+
+This pause does not cancel a customer's explicit deletion request. Customer-deleted volumes follow the separate [temporary 60-day retention policy](/docs/services/volumes). Neither retained disks nor this pause provide a backup guarantee; maintain independent backups.
