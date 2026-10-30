@@ -109,19 +109,17 @@ Parameters:
 <Note type="warning" title="Important Requirements">
 Before deleting a volume:
 1. **Detach the volume** - Remove the `storage` block from your `andasy.hcl` and redeploy, or stop all machines using the volume
-2. **Backup important data** - Once deleted, the volume and its data cannot be recovered
-3. **Save the volume ID** - You'll need it to download snapshots after deletion
+2. **Back up important data externally** - Automatic backups are unavailable; recovery after deletion is not guaranteed
+3. **Save the volume ID** - Include it when requesting recovery from support
 </Note>
 
-### Snapshots After Deletion
+### Temporary retention after customer deletion
 
-When a volume is deleted, Andasy retains snapshots for a limited time. To download these snapshots:
+Customer-deleted volume disks are retained for **60 days from the recorded deletion time** before becoming eligible for permanent cleanup. This is a temporary policy while backup support is being redesigned. Contact support promptly with the volume ID if you need recovery; recovery is best effort and is not self-service.
 
-1. **Save the volume ID** before deletion (use `andasy volumes list` to get it)
-2. **Wait 24 hours** - Snapshots are typically available after this period
-3. **Download using the volume ID** - Use [`andasy volumes snapshots`](/docs/services/snapshots) commands with the saved volume ID
+Retaining a disk is **not a backup** and does not protect against host or disk failure. Keep independent backups before deleting a volume. No new final snapshot is promised when a volume is deleted. Existing snapshots may be downloadable using the [snapshot commands](/docs/services/snapshots).
 
-Snapshots of deleted volumes are retained for a limited time, so download them promptly if you need the data.
+Permanent cleanup requires ownership checks, no remaining machine attachment or use, and no administrative hold. Older volumes are reviewed before cleanup. After permanent removal, the disk cannot be recovered. This 60-day policy applies to customer deletion; [billing suspension retention](/docs/reference/billing) is separate.
 
 ## Snapshots
 

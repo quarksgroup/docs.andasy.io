@@ -5,11 +5,12 @@ description: Learn how to create and manage snapshots of a volume in Andasy.
 
 A **snapshot** is a read-only copy of a volume's data at a specific point in time. Think of it as a photograph of your data that captures the exact state of your volume at the moment the snapshot was taken. Snapshots serve as backups, allowing you to restore your data to a previous state or recover from data loss.
 
-Key characteristics of snapshots:
+> **Current availability:** Automatic volume snapshots and scheduled backup retention are unavailable. Maintain independent backups outside Andasy and test your restores. The commands below access existing snapshots only; an empty list does not mean your data is protected.
+
+Key characteristics of existing snapshots:
 
 - **Point-in-time backup** - Captures volume state at a specific moment
-- **Automatic creation** - Andasy automatically creates daily snapshots of your volumes
-- **Retention period** - Snapshots are retained for a limited time (check current retention policy)
+- **Retention period** - Do not rely on a guaranteed retention period for existing snapshots; download any copies you need.
 - **Restore capability** - You can restore volumes from snapshots if data is lost or corrupted
 - **Downloadable** - Snapshots can be downloaded for external backup or migration
 
@@ -24,7 +25,7 @@ Use snapshots for:
 - **Migration** - Download snapshots to migrate data to another system
 - **Testing** - Create a copy of production data for testing without affecting production
 
-Snapshots are automatically created, but you can also download them manually for additional backup copies.
+No new automatic snapshots are currently promised. Download existing snapshots, where available, and maintain application-level backups independently.
 
 ## Listing Volume Snapshots
 
@@ -95,7 +96,7 @@ wget "https://download-link-from-command-output"
 
 ## Best Practices
 
-1. **Regular backups** - While Andasy creates automatic snapshots, consider downloading important snapshots for external backup
+1. **Regular backups** - Create and verify backups outside Andasy; automatic snapshots are currently unavailable
 2. **Save volume IDs** - Keep a record of volume IDs before deletion to access snapshots later
 3. **Test restores** - Periodically test restoring from snapshots to ensure your backup process works
 4. **Secure download links** - Keep download links confidential and download promptly (they expire in 24 hours)
